@@ -1,0 +1,26 @@
+                                      Easy C editor
+                                    -----------------
+
+                                        Commands:
+                                    ------------------
+                          :e <filename>     ||    Edits the given file
+                          :q                ||    Exit
+                          :!q               ||    Exit without saving
+                          :wq               ||    Write changes then exit
+                          :w                ||    Write changes
+                          :syntax <on/off>  ||    Enables or disables syntax highlighting
+                          :f <word>         ||    Find given word
+                          :cpy              ||    Copies all text in current file to the clipboard
+                                    -------------------
+
+                                         Keybinds:
+                                    -------------------
+                          'v'              ||    Enters selection mode
+                          'c'              ||    If in selection mode it "yanks" text to your clipboard
+                          'd'              ||    If in selection mode it deletes all selected text
+                          'x'              ||    If in selection mode it "yanks" then deleted selected text
+
+                          'h'              ||    Moves cursor left
+                          'j'              ||    Moves cursor down
+                          'k'              ||    Moves cursor up
+                          'l'              ||    Moves cursor right

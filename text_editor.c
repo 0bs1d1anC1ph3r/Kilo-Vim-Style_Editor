@@ -40,7 +40,8 @@ void initCommands()
 }
 
 //Data
-struct editorConfig E;
+editorConfig EE;
+editorConfig *E = &EE;
 
 void editorCopyToClipboard(const char *text, size_t len)
 {
@@ -63,43 +64,43 @@ void editorCopyToClipboard(const char *text, size_t len)
 //Editor opperations
 void editorInsertChar(int c)
 {
-  if (E.cy == E.numRows) {
-    editorAppendRow(E.numRows, "", 0);
+  if (E->cy == E->numRows) {
+    editorAppendRow(E->numRows, "", 0);
   }
 
-  editorRowInsertChar(&E.row[E.cy], E.cx, c);
-  E.cx++;
+  editorRowInsertChar(&E->row[E->cy], E->cx, c);
+  E->cx++;
 }
 
 void editorDelChar(void)
 {
-  if (E.cy == E.numRows) {
+  if (E->cy == E->numRows) {
     return;
   }
 
-  if (E.cx == 0 && E.cy == 0) {
+  if (E->cx == 0 && E->cy == 0) {
     return;
   }
 
-  erow *row = &E.row[E.cy];
-  if (E.cx > 0) {
-    editorRowDelChar(row, E.cx - 1);
-    E.cx--;
+  erow *row = &E->row[E->cy];
+  if (E->cx > 0) {
+    editorRowDelChar(row, E->cx - 1);
+    E->cx--;
   } else {
-    E.cx = E.row[E.cy - 1].size;
-    editorRowAppendString(&E.row[E.cy - 1], row -> chars, row -> size);
-    editorDelRow(E.cy);
-    E.cy--;
+    E->cx = E->row[E->cy - 1].size;
+    editorRowAppendString(&E->row[E->cy - 1], row -> chars, row -> size);
+    editorDelRow(E->cy);
+    E->cy--;
   }
 }
 
 _Bool editorIsSelected(int fileRow, int fileCol)
 {
-  if (!E.selecting) {
+  if (!E->selecting) {
     return 0;
   }
-    int startX = E.sel_sx, startY = E.sel_sy;
-    int endX = E.cx, endY = E.cy;
+    int startX = E->sel_sx, startY = E->sel_sy;
+    int endX = E->cx, endY = E->cy;
 
     if (startY > endY || (startY == endY && startX > endX)) {
       int tmpX = startX, tmpY = startY;
@@ -124,10 +125,10 @@ _Bool editorIsSelected(int fileRow, int fileCol)
 
 void editorDelSelected(void)
 {
-  int startY = E.sel_sy;
-  int startX = E.sel_sx;
-  int endY = E.cy;
-  int endX = E.cx;
+  int startY = E->sel_sy;
+  int startX = E->sel_sx;
+  int endY = E->cy;
+  int endX = E->cx;
 
   if (startY > endY || (startY == endY && startX > endX)) {
     int tmpX = startX, tmpY = startY;
@@ -136,63 +137,63 @@ void editorDelSelected(void)
     endX = tmpX;
     endY = tmpY;
   }
-  for (int y = startY; y <= endY && y < E.numRows;) {
-    int len = E.row[y].rsize;
+  for (int y = startY; y <= endY && y < E->numRows;) {
+    int len = E->row[y].rsize;
     int writePos = 0;
 
     for (int x = 0; x < len; x++) {
       if (!editorIsSelected(y, x)) {
-        E.row[y].render[writePos++] = E.row[y].render[x];
+        E->row[y].render[writePos++] = E->row[y].render[x];
       }
     }
-    E.row[y].rsize = writePos;
+    E->row[y].rsize = writePos;
 
     if (writePos > 0) {
-      E.row[y].render[writePos] = '\0';
-      E.row[y].size = editorRowCxToRx(&E.row[y], writePos);
+      E->row[y].render[writePos] = '\0';
+      E->row[y].size = editorRowCxToRx(&E->row[y], writePos);
       y++;
     } else {
       editorDelRow(y);
       endY--;
     }
   }
-  E.cy = startY;
-  E.cx = startX;
-  E.modified++;
+  E->cy = startY;
+  E->cx = startX;
+  E->modified++;
 }
 
 
 void editorInsertNewLine(void)
 {
-  if (E.cx == 0) {
-    editorAppendRow(E.cy, "", 0);
+  if (E->cx == 0) {
+    editorAppendRow(E->cy, "", 0);
   } else {
-    erow *row = &E.row[E.cy];
-    editorAppendRow(E.cy + 1, &row -> chars[E.cx], row -> size - E.cx);
-    row = &E.row[E.cy];
-    row -> size = E.cx;
-    row -> chars[row -> size] = '\0';
+    erow *row = &E->row[E->cy];
+    editorAppendRow(E->cy + 1, &row->chars[E->cx], row->size - E->cx);
+    row = &E->row[E->cy];
+    row->size = E->cx;
+    row->chars[row->size] = '\0';
     editorUpdateRow(row, 1);
   }
-  E.cy++;
-  E.cx = 0;
+  E->cy++;
+  E->cx = 0;
 }
 
 //File I/O
 void editorOpen(char *filename)
 {
-  free(E.filename);
+  free(E->filename);
 
-  while (E.numRows > 0) { // Delete all rows from buffer
-    editorDelRow(E.numRows - 1);
+  while (E->numRows > 0) { // Delete all rows from buffer
+    editorDelRow(E->numRows - 1);
   }
 
-  E.cx = 0; //Set cursor position to the top left of the file
-  E.cy = 0;
+  E->cx = 0; //Set cursor position to the top left of the file
+  E->cy = 0;
 
-  E.filename = strdup(filename); // Filename
-  E.modified = 0; // Set file to be unmodified
-  E.newFile = 0;
+  E->filename = strdup(filename); // Filename
+  E->modified = 0; // Set file to be unmodified
+  E->newFile = 0;
 
   FILE *fp = fopen(filename, "r");
 
@@ -210,7 +211,7 @@ void editorOpen(char *filename)
       explodeProgram("fopen");
     }
 
-    E.newFile = 1; // Set new file true
+    E->newFile = 1; // Set new file true
   }
 
   char *line = NULL;
@@ -220,10 +221,10 @@ void editorOpen(char *filename)
     while (lineLen > 0 && (line[lineLen - 1] == '\n' || line[lineLen - 1] == '\r')) {
       lineLen--;
     }
-    editorAppendRow(E.numRows, line, lineLen);
+    editorAppendRow(E->numRows, line, lineLen);
   }
 
-  if (E.numRows == 0) {
+  if (E->numRows == 0) {
     editorAppendRow(0, "", 0);
   }
 
@@ -234,19 +235,19 @@ void editorOpen(char *filename)
 //Input
 void editorBufferSelection(void)
 {
-  free(E.selectBuf);
-  E.selectBuf = NULL;
-  E.selectBufLen = 0;
+  free(E->selectBuf);
+  E->selectBuf = NULL;
+  E->selectBufLen = 0;
 
   struct abuf ab = ABUF_INIT;
 
-  for (int y = 0; y < E.numRows; y++) {
-    int len = E.row[y].rsize;
+  for (int y = 0; y < E->numRows; y++) {
+    int len = E->row[y].rsize;
     _Bool rowHasSelection = 0;
 
     for (int x = 0; x < len; x++) {
       if (editorIsSelected(y, x)) {
-        abAppend(&ab, &E.row[y].render[x], 1);
+        abAppend(&ab, &E->row[y].render[x], 1);
         rowHasSelection = 1;
       }
     }
@@ -254,45 +255,45 @@ void editorBufferSelection(void)
       abAppend(&ab, "\n", 1);
     }
   }
-  E.selectBuf = ab.b;
-  E.selectBufLen = ab.len;
+  E->selectBuf = ab.b;
+  E->selectBufLen = ab.len;
 }
 
 //Output
 void editorScroll(void)
 {
-  E.rx = 0;
-  if (E.cy < E.numRows) {
-    E.rx = editorRowCxToRx(&E.row[E.cy], E.cx);
+  E->rx = 0;
+  if (E->cy < E->numRows) {
+    E->rx = editorRowCxToRx(&E->row[E->cy], E->cx);
   }
 
-  if (E.cy < E.rowoff) {
-    E.rowoff = E.cy;
+  if (E->cy < E->rowoff) {
+    E->rowoff = E->cy;
   }
-  if (E.cy >= E.rowoff + E.screenRows) {
-    E.rowoff = E.cy - E.screenRows + 1;
+  if (E->cy >= E->rowoff + E->screenRows) {
+    E->rowoff = E->cy - E->screenRows + 1;
   }
-  if (E.rx < E.coloff) {
-    E.coloff = E.rx;
+  if (E->rx < E->coloff) {
+    E->coloff = E->rx;
   }
-  if (E.rx >= E.coloff + E.screenCols) {
-    E.coloff = E.rx - E.screenCols + 1;
+  if (E->rx >= E->coloff + E->screenCols) {
+    E->coloff = E->rx - E->screenCols + 1;
   }
 }
 
 void editorDrawRows(struct abuf *ab)
 {
   int y;
-  for (y = 0; y < E.screenRows; y++) {
-    int fileRow = y + E.rowoff;
+  for (y = 0; y < E->screenRows; y++) {
+    int fileRow = y + E->rowoff;
 
-    if (fileRow >= E.numRows) {
-      if (E.numRows == 0 && y == E.screenRows / 3) {
+    if (fileRow >= E->numRows) {
+      if (E->numRows == 0 && y == E->screenRows / 3) {
         char welcome[80];
         int welcomelen = snprintf(welcome, sizeof(welcome),
             "Easy C -- version %s", EASY_C_VERSION);
-      if (welcomelen > E.screenCols) welcomelen = E.screenCols;
-      int padding = (E.screenCols - welcomelen) / 2;
+      if (welcomelen > E->screenCols) welcomelen = E->screenCols;
+      int padding = (E->screenCols - welcomelen) / 2;
 
       if (padding) {
         abAppend(ab, "~", 1);
@@ -305,28 +306,28 @@ void editorDrawRows(struct abuf *ab)
         abAppend(ab, "~", 1);
       }
     } else {
-      int len = E.row[fileRow].rsize - E.coloff;
+      int len = E->row[fileRow].rsize - E->coloff;
       if (len < 0) {
         len = 0;
       }
 
-      if (len > E.screenCols) {
-        len = E.screenCols;
+      if (len > E->screenCols) {
+        len = E->screenCols;
       }
 
       for (int j = 0; j < len;) {
-        int cx = j + E.coloff;
+        int cx = j + E->coloff;
         int cy = fileRow;
 
         if (editorIsSelected(cy, cx)) {
           abAppend(ab, "\x1b[7m", 4);
-          abAppend(ab, &E.row[fileRow].render[j + E.coloff], 1);
+          abAppend(ab, &E->row[fileRow].render[j + E->coloff], 1);
           abAppend(ab, "\x1b[m", 3);
           j++;
       } else {
         int start = j;
         while (j < len) {
-          cx = j + E.coloff;
+          cx = j + E->coloff;
           cy = fileRow;
 
           if (editorIsSelected(cy, cx)) {
@@ -334,7 +335,7 @@ void editorDrawRows(struct abuf *ab)
           }
           j++;
         }
-        abAppend(ab, &E.row[fileRow].render[start + E.coloff], j - start);
+        abAppend(ab, &E->row[fileRow].render[start + E->coloff], j - start);
       }
     }
   }
@@ -349,21 +350,21 @@ void editorDrawStatusBar(struct abuf *ab)
   abAppend(ab, "\x1b[7m", 4);
   char status[BAR_CHAR_LIMIT], rstatus[BAR_CHAR_LIMIT];
   const char *modeName = (mode == MODE_NORMAL) ? "-- NORMAL --" : "-- INSERT --";
-  const char *newFile = (E.newFile) ? "[ NEW ] " : "";
+  const char *newFile = (E->newFile) ? "[ NEW ] " : "";
 
   int len = snprintf(status, sizeof(status), "%s | %s\"%.20s\" -- %d Lines %s",
-      modeName, newFile ,E.filename ? E.filename : "[No Name]", E.numRows,
-      E.modified ? "(modified)" : "");
+      modeName, newFile ,E->filename ? E->filename : "[No Name]", E->numRows,
+      E->modified ? "(modified)" : "");
   int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d:%d/%d",
-      E.cy + 1, E.numRows, E.rx + 1, (E.row[E.cy].rsize) + 1);
-  if (len > E.screenCols) {
-    len = E.screenCols;
+      E->cy + 1, E->numRows, E->rx + 1, (E->row[E->cy].rsize) + 1);
+  if (len > E->screenCols) {
+    len = E->screenCols;
   }
 
   abAppend(ab, status, len);
 
-  while (len < E.screenCols) {
-    if (E.screenCols - len == rlen) {
+  while (len < E->screenCols) {
+    if (E->screenCols - len == rlen) {
       abAppend(ab, rstatus, rlen);
       break;
     } else {
@@ -378,20 +379,20 @@ void editorDrawStatusBar(struct abuf *ab)
 void editorDrawMessageBar(struct abuf *ab)
 {
   abAppend(ab, "\x1b[K", 3);
-  int msgLen = strlen(E.statusMsg);
+  int msgLen = strlen(E->statusMsg);
 
-  if (msgLen > E.screenCols) {
-    msgLen = E.screenCols;
+  if (msgLen > E->screenCols) {
+    msgLen = E->screenCols;
 
   }
 
   if (msgLen > 0) {
     char timebuf[16];
-    struct tm *tm = localtime(&E.statusMsgTime);
+    struct tm *tm = localtime(&E->statusMsgTime);
     strftime(timebuf, sizeof(timebuf), "[%H:%M:%S] -- ", tm);
 
     abAppend(ab, timebuf, strlen(timebuf));
-    abAppend(ab, E.statusMsg, msgLen);
+    abAppend(ab, E->statusMsg, msgLen);
   }
 
 }
@@ -405,7 +406,7 @@ void editorUpdateCursor(void)
       break;
     case MODE_NORMAL:
     case MODE_VISUAL:
-      if (E.selecting) {
+      if (E->selecting) {
         write(STDOUT_FILENO, "\x1b[6 q", 5);
       } else {
         write(STDOUT_FILENO,"\x1b[2 q", 5);
@@ -429,7 +430,7 @@ void editorRefreshScreen(void)
   editorDrawMessageBar(&ab);
 
   char buf[32];
-  snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.rowoff) + 1, (E.rx - E.coloff) + 1);
+  snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E->cy - E->rowoff) + 1, (E->rx - E->coloff) + 1);
   abAppend(&ab, buf, strlen(buf));
 
   abAppend(&ab, "\x1b[?25h", 6);
@@ -442,9 +443,9 @@ void editorSetStatusMessage(const char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  vsnprintf(E.statusMsg, sizeof(E.statusMsg), fmt, ap);
+  vsnprintf(E->statusMsg, sizeof(E->statusMsg), fmt, ap);
   va_end(ap);
-  E.statusMsgTime = time(NULL);
+  E->statusMsgTime = time(NULL);
 }
 
 //Command handler
@@ -461,7 +462,7 @@ void editFile(const char *cmd, int cmdlen)
   } else {
     editorOpen((char *) filename);
 
-    if (E.newFile) {
+    if (E->newFile) {
       editorSetStatusMessage("New File Created: %s", filename);
     } else {
       editorSetStatusMessage("Opened file: %s", filename);
@@ -504,36 +505,36 @@ void editorCommandMode(void)
 }
 
 //Init
-void initEditor(void)
+void initEditor(struct editorConfig *E)
 {
-    E.cx = 0;
-    E.cy = 0;
-    E.rx = 0;
-    E.rowoff = 0;
-    E.coloff = 0;
-    E.numRows = 0;
-    E.row = NULL;
-    E.filename = NULL;
-    E.statusMsg[0] = '\0';
-    E.statusMsgTime = 0;
-    E.modified = 0;
-    E.selecting = 0;
-    E.sel_sx = 0;
-    E.sel_sy = 0;
-    E.selectBuf = NULL;
-    E.selectBufLen = 0;
-    E.newFile = 0;
-    if (getWindowSize(&E.screenRows, &E.screenCols) == -2) {
+    E -> cx = 0;
+    E -> cy = 0;
+    E -> rx = 0;
+    E -> rowoff = 0;
+    E -> coloff = 0;
+    E -> numRows = 0;
+    E -> row = NULL;
+    E -> filename = NULL;
+    E -> statusMsg[0] = '\0';
+    E -> statusMsgTime = 0;
+    E -> modified = 0;
+    E -> selecting = 0;
+    E -> sel_sx = 0;
+    E -> sel_sy = 0;
+    E -> selectBuf = NULL;
+    E -> selectBufLen = 0;
+    E -> newFile = 0;
+    if (getWindowSize(&E -> screenRows, &E -> screenCols) == -2) {
         explodeProgram("getWindowSize");
     }
 
-    E.screenRows -= 2; // Do not forget about this just because it is here
+    E -> screenRows -= 2; // Do not forget about this just because it is here
 }
 
 int main(int argc, char *argv[])
 {
   enableRawMode();
-  initEditor();
+  initEditor(E);
   initCommands();
 
   if (argc >= 2) {

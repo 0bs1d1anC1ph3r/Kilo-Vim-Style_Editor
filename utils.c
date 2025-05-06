@@ -45,8 +45,8 @@ struct abuf
 // Append to buffer
 void abAppend(struct abuf *ab, const char *s, int len)
 {
-    if (ab -> len + len > ab -> capacity) {
-        int newCapacity = ab -> capacity;
+    if (ab->len + len > ab->capacity) {
+        int newCapacity = ab->capacity;
 
         if (newCapacity == 0) {
             newCapacity = 32;
@@ -54,27 +54,27 @@ void abAppend(struct abuf *ab, const char *s, int len)
             newCapacity = newCapacity * 2;
         }
 
-        while (newCapacity < ab -> len + len) {
+        while (newCapacity < ab->len + len) {
             newCapacity *= 2;
         }
 
-    char *newBuf = xrealloc(ab -> b, newCapacity);
+    char *newBuf = xrealloc(ab->b, newCapacity);
 
-    ab -> b = newBuf;
-    ab -> capacity = newCapacity;
+    ab->b = newBuf;
+    ab->capacity = newCapacity;
 
     }
-    memcpy(&ab -> b[ab -> len], s, len);
-    ab -> len += len;
+    memcpy(&ab->b[ab->len], s, len);
+    ab->len += len;
 }
 
 // Free appended buffer
 void abFree(struct abuf *ab)
 {
-    free(ab -> b);
-    ab -> b = NULL;
-    ab -> len = 0;
-    ab -> capacity = 0;
+    free(ab->b);
+    ab->b = NULL;
+    ab->len = 0;
+    ab->capacity = 0;
 }
 
 

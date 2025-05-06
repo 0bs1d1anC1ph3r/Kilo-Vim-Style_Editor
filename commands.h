@@ -12,9 +12,9 @@ typedef struct
 void registerCommand(const char *name, CommandHandler handler);
 void executeCommand(const char *cmd);
 
-void editorSave(_Bool forceWrite, const char *args);
-void editorQuit(_Bool forceQuit, const char *args);
-void editorSaveQuit(_Bool forceWrite, const char *args);
-void editorEditFile(_Bool forceEdit, const char *args);
+void editorSave(_Bool forceWrite, const char *args, struct editorConfig *E);
+void editorQuit(_Bool forceQuit, const char *args, struct editorConfig *E);
+void editorSaveQuit(_Bool forceWrite, const char *args, struct editorConfig *E);
+void editorEditFile(_Bool forceEdit, const char *args,  struct editorConfig *E);
 #endif
 

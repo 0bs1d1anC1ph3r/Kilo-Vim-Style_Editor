@@ -21,7 +21,7 @@ typedef enum editorMode {
 
 extern int mode;
 
-struct editorConfig
+typedef struct editorConfig
 {
     int cx, cy; // Cursor position
     int rx; // Render x
@@ -41,9 +41,14 @@ struct editorConfig
     int selectBufLen;
     _Bool newFile;
     struct termios orig_termios;
-};
 
-extern struct editorConfig E;
+    struct editorConfig *undo;
+    struct editorConfig *redo;
+
+} editorConfig;
+
+editorConfig EE;
+editorConfig *E = &EE;
 
 enum editorKey {
   BACKSPACE = 127,
