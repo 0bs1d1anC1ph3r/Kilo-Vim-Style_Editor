@@ -1,7 +1,7 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
-typedef void (*CommandHandler)(_Bool forceFlag, const char *args);
+typedef void (*CommandHandler)(_Bool forceFlag, const char *args, struct editorConfig *E);
 
 typedef struct
 {

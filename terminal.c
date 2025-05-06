@@ -11,7 +11,7 @@
 //Terminal
 void disableRawMode(void)
 {
-    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.orig_termios) == -1) {
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &E->orig_termios) == -1) {
         explodeProgram("tcsetattr");
     }
     write(STDOUT_FILENO, "\x1b[2 q", 5); //Reset cursor as well
@@ -19,12 +19,12 @@ void disableRawMode(void)
 
 void enableRawMode(void)
 {
-    if (tcgetattr(STDIN_FILENO, &E.orig_termios) == -1) {
+    if (tcgetattr(STDIN_FILENO, &E->orig_termios) == -1) {
         explodeProgram("tcgetattr");
     }
     atexit(disableRawMode);
 
-    struct termios raw = E.orig_termios;
+    struct termios raw = E->orig_termios;
     raw.c_iflag &= ~(IXON | ICRNL | BRKINT | INPCK | ISTRIP);
     raw.c_oflag &= ~(OPOST);
     raw.c_cflag &= ~(CS8);

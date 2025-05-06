@@ -58,93 +58,93 @@ void editorUpdateRow(erow *row, int mod)
 
   if (mod)
   {
-    E.modified++;
+    E->modified++;
   }
 }
 
 void editorAppendRow(int at, char *s, size_t len)
 {
-  if (at < 0 || at > E.numRows) {
+  if (at < 0 || at > E->numRows) {
     return;
   }
 
-  E.row = xrealloc(E.row, sizeof(erow) * (E.numRows + 1));
-  memmove(&E.row[at + 1], &E.row[at], sizeof(erow) * (E.numRows - at));
+  E->row = xrealloc(E->row, sizeof(erow) * (E->numRows + 1));
+  memmove(&E->row[at + 1], &E->row[at], sizeof(erow) * (E->numRows - at));
 
-  E.row[at].capacity = len + 1;
-  E.row[at].size = len;
-  E.row[at].chars = xmalloc(len + 1);
+  E->row[at].capacity = len + 1;
+  E->row[at].size = len;
+  E->row[at].chars = xmalloc(len + 1);
 
   if (len > 0) {
-    memcpy(E.row[at].chars, s, len);
+    memcpy(E->row[at].chars, s, len);
   }
 
-  E.row[at].chars[len] = '\0';
+  E->row[at].chars[len] = '\0';
 
-  E.row[at].rsize = 0;
-  E.row[at].render = NULL;
-  editorUpdateRow(&E.row[at], 0);
+  E->row[at].rsize = 0;
+  E->row[at].render = NULL;
+  editorUpdateRow(&E->row[at], 0);
 
-  E.numRows++;
+  E->numRows++;
 }
 
 void editorDelRow(int at)
 {
-  if (at < 0 || at >= E.numRows) {
+  if (at < 0 || at >= E->numRows) {
     return;
   }
 
-  erow *row = &E.row[at];
+  erow *row = &E->row[at];
   free(row -> chars);
   free(row -> render);
 
-  memmove(&E.row[at], &E.row[at + 1], sizeof(erow) * (E.numRows - at - 1));
-  E.numRows--;
+  memmove(&E->row[at], &E->row[at + 1], sizeof(erow) * (E->numRows - at - 1));
+  E->numRows--;
 }
 
 void editorRowInsertChar(erow *row, int at, int c)
 {
-  if (at < 0 || at > row -> size) {
-    at = row -> size;
+  if (at < 0 || at > row->size) {
+    at = row->size;
   }
 
-  if (row -> size + 1 >= row -> capacity) {
-    int newCapacity = row -> capacity + ROW_GROWTH_CHUNK;
-    if (newCapacity < row -> size + 2) {
-      newCapacity = row -> size + 2;
+  if (row->size + 1 >= row->capacity) {
+    int newCapacity = row->capacity + ROW_GROWTH_CHUNK;
+    if (newCapacity < row->size + 2) {
+      newCapacity = row->size + 2;
     }
-    row -> chars = xrealloc(row -> chars, newCapacity);
-    row -> capacity = newCapacity;
+    row->chars = xrealloc(row->chars, newCapacity);
+    row->capacity = newCapacity;
   }
-  if (at == row -> size) {
-    row -> chars[at] = c;
-    row -> chars[at + 1] = '\0';
+  if (at == row->size) {
+    row->chars[at] = c;
+    row->chars[at + 1] = '\0';
   } else {
-    memmove(&row -> chars[at + 1], &row -> chars[at], row -> size - at + 1);
-    row -> chars[at] = c;
+    memmove(&row->chars[at + 1], &row->chars[at], row->size - at + 1);
+    row->chars[at] = c;
   }
-  row -> size++;
+  row->size++;
   editorUpdateRow(row, 1);
 }
 
 void editorRowDelChar(erow *row, int at)
 {
-  if (at < 0 || at > row -> size) {
+  if (at < 0 || at > row->size) {
     return;
   }
 
-  memmove(&row -> chars[at], &row -> chars[at + 1], row -> size - at);
-  row -> size--;
+  memmove(&row->chars[at], &row->chars[at + 1], row->size - at);
+  row->size--;
 
   editorUpdateRow(row, 1);
 }
 
 void editorRowAppendString(erow *row, char *s, size_t len)
 {
-  row -> chars = xrealloc(row -> chars, row -> size + len + 1);
-  memcpy(&row -> chars[row -> size], s, len);
-  row -> size += len;
-  row -> chars[row -> size] = '\0';
+  row->chars = xrealloc(row->chars, row->size + len + 1);
+  memcpy(&row->chars[row->size], s, len);
+  row->size += len;
+  row->chars[row->size] = '\0';
   editorUpdateRow(row, 1);
 }
 
@@ -154,8 +154,8 @@ char *editorRowsToString(int *bufLen)
   int totalLen = 0;
   int j;
 
-  for (j = 0; j < E.numRows; j++) {
-    totalLen += E.row[j].size + 1;
+  for (j = 0; j < E->numRows; j++) {
+    totalLen += E->row[j].size + 1;
   }
 
   *bufLen = totalLen;
@@ -164,9 +164,9 @@ char *editorRowsToString(int *bufLen)
   buf = xmalloc(totalLen);
   p = buf;
 
-  for (j = 0; j < E.numRows; j++) {
-    memcpy(p, E.row[j].chars, E.row[j].size);
-    p += E.row[j].size;
+  for (j = 0; j < E->numRows; j++) {
+    memcpy(p, E->row[j].chars, E->row[j].size);
+    p += E->row[j].size;
     *p = '\n';
     p++;
   }

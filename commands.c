@@ -34,7 +34,7 @@ void executeCommand(const char *cmd)
   for (int i = 0; i < commandCount; i++) {
     if (strncmp(cmd, commandRegistry[i].name, commandLen) == 0 &&
         commandRegistry[i].name[commandLen] == '\0') {
-      commandRegistry[i].handler(forceFlag, args ? args + 1 : NULL);
+      commandRegistry[i].handler(forceFlag, args ? args + 1 : NULL, E);
       return;
     }
   }

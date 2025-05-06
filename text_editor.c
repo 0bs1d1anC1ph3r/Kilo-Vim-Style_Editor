@@ -40,9 +40,6 @@ void initCommands()
 }
 
 //Data
-editorConfig EE;
-editorConfig *E = &EE;
-
 void editorCopyToClipboard(const char *text, size_t len)
 {
   const char *display = getenv("WAYLAND_DISPLAY");

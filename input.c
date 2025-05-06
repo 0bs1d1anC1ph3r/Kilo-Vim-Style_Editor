@@ -77,10 +77,10 @@ int editorReadKey(void)
 void editorMoveCursor(int key)
 {
   erow *row;
-  if (E.cy >= E.numRows) {
+  if (E->cy >= E->numRows) {
     row = NULL;
   } else {
-    row = &E.row[E.cy];
+    row = &E->row[E->cy];
   }
 
   switch (key)
@@ -88,54 +88,54 @@ void editorMoveCursor(int key)
     case 'h':
     case ARROW_LEFT:
     case 'A':
-      if (E.cx != 0) {
-        E.cx--;
-      } else if (E.cy > 0) {
-        E.cy--;
-        E.cx = E.row[E.cy].size;
+      if (E->cx != 0) {
+        E->cx--;
+      } else if (E->cy > 0) {
+        E->cy--;
+        E->cx = E->row[E->cy].size;
       }
       break;
     case 'l':
     case ARROW_RIGHT:
     case 'D':
-      if (row && E.cx < row -> size) {
-        E.cx++;
-      } else if (row && E.cx == row -> size) {
-        E.cy++;
-        E.cx = 0;
+      if (row && E->cx < row->size) {
+        E->cx++;
+      } else if (row && E->cx == row->size) {
+        E->cy++;
+        E->cx = 0;
       }
       break;
     case 'k':
     case ARROW_UP:
     case 'W':
-      if (E.cy != 0) {
-        E.cy--;
+      if (E->cy != 0) {
+        E->cy--;
       }
       break;
     case 'j':
     case ARROW_DOWN:
     case 'S':
-      if (E.cy < E.numRows - 1) {
-        E.cy++;
+      if (E->cy < E->numRows - 1) {
+        E->cy++;
       }
       break;
     }
 
-  if (E.cy >= E.numRows) {
+  if (E->cy >= E->numRows) {
     row = NULL;
   } else {
-    row = &E.row[E.cy];
+    row = &E->row[E->cy];
   }
 
   int rowLen;
   if (row) {
-    rowLen = row -> size;
+    rowLen = row->size;
   } else {
     rowLen = 0;
   }
 
-  if (E.cx > rowLen) {
-    E.cx = rowLen;
+  if (E->cx > rowLen) {
+    E->cx = rowLen;
   }
 }
 
@@ -176,25 +176,25 @@ void editorProcessKeypress(void)
       switch (c)
       {
         case END_KEY:
-          E.cx = 0;
+          E->cx = 0;
           break;
         case HOME_KEY:
-          if (E.cy < E.numRows) {
-            E.cx = E.row[E.cy].size;
+          if (E->cy < E->numRows) {
+            E->cx = E->row[E->cy].size;
           }
           break;
         case PAGE_UP:
         case PAGE_DOWN:
           {
             if (c == PAGE_UP) {
-              E.cy = E.rowoff;
+              E->cy = E->rowoff;
             } else if (c == PAGE_DOWN) {
-              E.cy = E.rowoff + E.screenRows - 1;
-              if (E.cy > E.numRows) {
-                E.cy = E.numRows;
+              E->cy = E->rowoff + E->screenRows - 1;
+              if (E->cy > E->numRows) {
+                E->cy = E->numRows;
               }
             }
-            int times = E.screenRows;
+            int times = E->screenRows;
             while (times--) {
               editorMoveCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
             }
@@ -213,56 +213,56 @@ void editorProcessKeypress(void)
           editorMoveCursor(c);
           break;
         case 'v':
-          if (!E.selecting) {
-            E.selecting = 1;
-            E.sel_sx = E.cx;
-            E.sel_sy = E.cy;
+          if (!E->selecting) {
+            E->selecting = 1;
+            E->sel_sx = E->cx;
+            E->sel_sy = E->cy;
           } else {
-            E.selecting = 0;
-            E.cy = E.sel_sy;
-            E.cx = E.sel_sx;
+            E->selecting = 0;
+            E->cy = E->sel_sy;
+            E->cx = E->sel_sx;
           }
           break;
         case 27:
-          if (E.selecting) {
-            E.selecting = 0;
+          if (E->selecting) {
+            E->selecting = 0;
           }
           break;
         case 'y':
-          if (E.selecting) {
+          if (E->selecting) {
             editorBufferSelection();
-            editorCopyToClipboard(E.selectBuf, E.selectBufLen);
+            editorCopyToClipboard(E->selectBuf, E->selectBufLen);
           }
           break;
         case CTRL_KEY('y'):
-          if (E.selecting) {
+          if (E->selecting) {
             editorBufferSelection();
-            editorCopyToClipboard(E.selectBuf, E.selectBufLen);
+            editorCopyToClipboard(E->selectBuf, E->selectBufLen);
 
-            E.selecting = 0;
-            E.cy = E.sel_sy;
-            E.cx = E.sel_sx;
+            E->selecting = 0;
+            E->cy = E->sel_sy;
+            E->cx = E->sel_sx;
           }
           break;
         case 'd':
-          if (E.selecting) {
+          if (E->selecting) {
             editorDelSelected();
-            E.selecting = 0;
+            E->selecting = 0;
           }
           break;
         case 'x':
-          if (E.selecting) {
+          if (E->selecting) {
             editorBufferSelection();
-            editorCopyToClipboard(E.selectBuf, E.selectBufLen);
+            editorCopyToClipboard(E->selectBuf, E->selectBufLen);
             editorDelSelected();
 
-            E.selecting = 0;
+            E->selecting = 0;
           }
         case ARROW_RIGHT:
         case ARROW_DOWN:
         case ARROW_UP:
         case ARROW_LEFT:
-          if (E.selecting) {
+          if (E->selecting) {
             editorMoveCursor(c);
           }
           break;
