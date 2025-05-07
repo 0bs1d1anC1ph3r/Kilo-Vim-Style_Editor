@@ -7,7 +7,7 @@
 void explodeProgram (const char *string);
 
 //Memory management
-void *xmalloc (size_t size);
+void *xmalloc (size_t size, _Bool zero);
 void *xrealloc (void *ptr, size_t size);
 
 // Append buffer operations

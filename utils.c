@@ -13,14 +13,16 @@ void explodeProgram(const char *string)
 }
 
 // Memory handling
-void *xmalloc(size_t size)
+void *xmalloc(size_t size, _Bool zero)
 {
   void *p = malloc(size);
   if (!p) {
     explodeProgram("malloc");
   }
 
-  memset(p, 0, size);
+  if (zero) {
+    memset(p, 0, size);
+  }
   return p;
 }
 

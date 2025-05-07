@@ -1,5 +1,7 @@
 #include <unistd.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "utils.h"
 #include "rows.h"
@@ -230,13 +232,32 @@ void editorProcessKeypress(void)
         case 'y':
           if (E->selecting) {
             editorBufferSelection();
-            editorCopyToClipboard(E->selectBuf, E->selectBufLen);
+            if (E->selectBuf && E->selectBufLen > 0) {
+              editorCopyToClipboard(E->selectBuf, E->selectBufLen);
+            } else {
+              editorSetStatusMessage("Nothing selected to copy.");
+            }
           }
           break;
         case CTRL_KEY('y'):
           if (E->selecting) {
+            fprintf(stderr, "Yank initiated. Selection active.\n");
             editorBufferSelection();
-            editorCopyToClipboard(E->selectBuf, E->selectBufLen);
+
+            if (E->selectBuf) {
+              fprintf(stderr, "Buffered Text: %s\n", E->selectBuf);
+            } else {
+              fprintf(stderr, "No text buffered. Buffer is NULL.\n");
+            }
+
+            if (E->selectBuf && E->selectBufLen > 0) {
+              editorCopyToClipboard(E->selectBuf, E->selectBufLen);
+
+              fprintf(stderr, "Yank completed successfully.\n");
+
+            } else {
+              editorSetStatusMessage("Nothing selected to copy.");
+            }
 
             E->selecting = 0;
             E->cy = E->sel_sy;
@@ -252,7 +273,12 @@ void editorProcessKeypress(void)
         case 'x':
           if (E->selecting) {
             editorBufferSelection();
-            editorCopyToClipboard(E->selectBuf, E->selectBufLen);
+            if (E->selectBuf && E->selectBufLen > 0) {
+              editorCopyToClipboard(E->selectBuf, E->selectBufLen);
+            } else {
+              editorSetStatusMessage("Nothing selected to copy.");
+            }
+
             editorDelSelected();
 
             E->selecting = 0;

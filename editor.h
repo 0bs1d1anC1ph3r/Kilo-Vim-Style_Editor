@@ -43,7 +43,6 @@ typedef struct editorConfig
     struct termios orig_termios;
 } editorConfig;
 
-extern editorConfig EE;
 extern editorConfig *E;
 
 enum editorKey {

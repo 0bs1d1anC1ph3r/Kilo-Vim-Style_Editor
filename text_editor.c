@@ -24,6 +24,22 @@
 #include "input.h"
 #include "commands.h"
 
+// Initialization
+editorConfig *E = NULL;
+int mode = MODE_NORMAL;
+
+void initCommands()
+{
+  registerCommand("w", editorSave);
+  registerCommand("!w", editorSave);
+  registerCommand("q", editorQuit);
+  registerCommand("!q", editorQuit);
+  registerCommand("e", editorEditFile);
+  registerCommand("!e", editorEditFile);
+  registerCommand("wq", editorSaveQuit);
+  registerCommand("!wq", editorSaveQuit);
+}
+
 // Cleanup
 void freeEditorConfig(struct editorConfig *E)
 {
@@ -45,9 +61,7 @@ void freeEditorConfig(struct editorConfig *E)
     }
     free(E->row);
   }
-  if (E != &EE) {
     free(E);
-  }
 }
 
 void cleanupWrapper(void) {
@@ -55,41 +69,30 @@ void cleanupWrapper(void) {
   freeEditorConfig(E);
 }
 
-// Initialization
-int mode = MODE_NORMAL;
-
-editorConfig EE;
-editorConfig *E = &EE;
-
-void initCommands()
-{
-  registerCommand("w", editorSave);
-  registerCommand("!w", editorSave);
-  registerCommand("q", editorQuit);
-  registerCommand("!q", editorQuit);
-  registerCommand("e", editorEditFile);
-  registerCommand("!e", editorEditFile);
-  registerCommand("wq", editorSaveQuit);
-  registerCommand("!wq", editorSaveQuit);
-}
-
 //Data
 void editorCopyToClipboard(const char *text, size_t len)
 {
-  const char *display = getenv("WAYLAND_DISPLAY");
-  FILE *pipe = NULL;
-
-  if (display) {
-    pipe = popen("wl-copy", "w");
-  } else {
-    pipe = popen("xclip -selection clipboard", "w");
+  if (!text || len == 0) {
+    return;
   }
 
-  if (!pipe) {
-    editorSetStatusMessage("ERROR COPYING TO CLIPBOARD -- Only Wayland and Xorg (through xclip) works currently.");
+  FILE *clipboard = popen("wl-copy", "w");
+  if (!clipboard) {
+    editorSetStatusMessage("Failed to open clipboard utility.");
+    return;
   }
-    fwrite(text, sizeof(char), len, pipe);
-    pclose(pipe);
+
+  if (fwrite(text, len, 1, clipboard) != 1) {
+    editorSetStatusMessage("Failed to write to clipboard.");
+    pclose(clipboard);
+    return;
+  }
+
+  if (pclose(clipboard) == -1) {
+    editorSetStatusMessage("Failed to close clipboard utility.");
+    return;
+  }
+  editorSetStatusMessage("Copied %zu bytes to clipboard.", len);
 }
 
 //Editor opperations
@@ -265,6 +268,11 @@ void editorOpen(char *filename)
 //Input
 void editorBufferSelection(void)
 {
+  if (!E || !E->selecting) {
+    editorSetStatusMessage("No active selection to copy.");
+    return;
+  }
+
   free(E->selectBuf);
   E->selectBuf = NULL;
   E->selectBufLen = 0;
@@ -287,6 +295,10 @@ void editorBufferSelection(void)
   }
   E->selectBuf = ab.b;
   E->selectBufLen = ab.len;
+
+  if (!E->selectBuf || E->selectBufLen == 0) {
+    editorSetStatusMessage("No selection to copy.");
+  }
 }
 
 //Output
@@ -563,8 +575,14 @@ void initEditor(struct editorConfig *E)
 
 int main(int argc, char *argv[])
 {
-  enableRawMode();
+  E = malloc(sizeof(editorConfig));
+  if (!E) {
+    explodeProgram("Failed to allocate editorConfig");
+  }
+  memset(E, 0, sizeof(editorConfig));
+
   initEditor(E);
+  enableRawMode();
   atexit(cleanupWrapper);
   initCommands();
 
