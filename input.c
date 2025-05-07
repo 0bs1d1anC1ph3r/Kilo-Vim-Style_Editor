@@ -260,6 +260,9 @@ void editorProcessKeypress(void)
             E->selecting = 0;
           }
         case 't':
+          if (E == NULL) {
+            explodeProgram("E");
+          }
           { E = historyPush(E); }
           break;
         case ARROW_RIGHT:
