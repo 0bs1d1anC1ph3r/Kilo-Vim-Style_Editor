@@ -23,7 +23,6 @@
 #include "utils.h"
 #include "input.h"
 #include "commands.h"
-#include "history.h"
 
 // Initialization
 int mode = MODE_NORMAL;

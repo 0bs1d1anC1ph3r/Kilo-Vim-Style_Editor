@@ -138,21 +138,29 @@ void editorEditFile(_Bool forceEdit, const char *args, struct editorConfig *E)
   editorOpen(filename);
 }
 
-void editorUndo(_Bool force, const char *args, struct editorConfig *E)
+void editorUndo(_Bool force, const char *args, struct editorConfig **E)
 {
+  if (*E == NULL) {
+    explodeProgram("Null editorConfig passed to editorUndo");
+  }
+
   if (args != NULL) {
     editorSetStatusMessage("Invalid number of arguments");
     return;
   }
 
-  E = historyUndo(E);
+  *E = historyUndo(*E);
 }
 
-void editorRedo(_Bool force, const char *args, struct editorConfig *E)
+void editorRedo(_Bool force, const char *args, struct editorConfig **E)
 {
+  if (*E == NULL) {
+    explodeProgram("Null editorConfig passed to editorUndo");
+  }
+
   if (args != NULL) {
     editorSetStatusMessage("Invalid number of arguments");
     return;
   }
-  E = historyRedo(E);
+  *E = historyRedo(*E);
 }
