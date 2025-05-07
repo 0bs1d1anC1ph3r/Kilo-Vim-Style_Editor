@@ -5,10 +5,11 @@
 
 history H;
 
-editorConfig *copyEditorConfig(editorConfig *old)
-{
+editorConfig *copyEditorConfig(editorConfig *old) {
+  if (old == NULL || old->row == NULL || old->numRows < 0) {
+    explodeProgram("Invalid editorConfig object passed to copyEditorConfig");
+  }
   editorConfig *new = xmalloc(sizeof(editorConfig));
-
   new->cx = old->cx;
   new->cy = old->cy;
   new->rx = old->rx;
@@ -16,17 +17,18 @@ editorConfig *copyEditorConfig(editorConfig *old)
   new->coloff = old->coloff;
   new->screenRows = old->screenRows;
   new->screenCols = old->screenCols;
-
   new->numRows = old->numRows;
   new->row = xmalloc(sizeof(erow) * (old->numRows));
+
   for (int i = 0; i < new->numRows; i++) {
     new->row[i].size = old->row[i].size;
     new->row[i].rsize = old->row[i].rsize;
-
-    new->row[i].chars = xmalloc (old->row[i].size + 1);
+    if (old->row[i].chars == NULL || old->row[i].render == NULL) {
+      explodeProgram("Invalid row data in editorConfig");
+    }
+    new->row[i].chars = xmalloc(old->row[i].size + 1);
     memcpy(new->row[i].chars, old->row[i].chars, old->row[i].size + 1);
-
-    new->row[i].render = xmalloc (old->row[i].rsize + 1);
+    new->row[i].render = xmalloc(old->row[i].rsize + 1);
     memcpy(new->row[i].render, old->row[i].render, old->row[i].rsize + 1);
   }
   return new;

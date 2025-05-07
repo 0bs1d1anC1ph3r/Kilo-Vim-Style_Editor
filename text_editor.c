@@ -532,6 +532,9 @@ void initEditor(struct editorConfig *E)
     }
 
     E -> screenRows -= 2; // Do not forget about this just because it is here
+
+    E->undo = NULL;
+    E->redo = NULL;
 }
 
 int main(int argc, char *argv[])
