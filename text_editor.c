@@ -184,8 +184,6 @@ void editorInsertNewLine(void)
 //File I/O
 void editorOpen(char *filename)
 {
-  free(E->filename);
-
   while (E->numRows > 0) { // Delete all rows from buffer
     editorDelRow(E->numRows - 1);
   }
