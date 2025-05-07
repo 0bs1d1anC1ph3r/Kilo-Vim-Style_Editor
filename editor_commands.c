@@ -148,3 +148,11 @@ void editorUndo(_Bool force, const char *args, struct editorConfig *E)
   E = historyUndo(E);
 }
 
+void editorRedo(_Bool force, const char *args, struct editorConfig *E)
+{
+  if (args != NULL) {
+    editorSetStatusMessage("Invalid number of arguments");
+    return;
+  }
+  E = historyRedo(E);
+}

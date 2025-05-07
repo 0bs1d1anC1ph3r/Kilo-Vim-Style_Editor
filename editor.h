@@ -47,8 +47,8 @@ typedef struct editorConfig
 
 } editorConfig;
 
-editorConfig EE;
-editorConfig *E = &EE;
+extern editorConfig EE;
+extern editorConfig *E;
 
 enum editorKey {
   BACKSPACE = 127,

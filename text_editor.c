@@ -23,9 +23,13 @@
 #include "utils.h"
 #include "input.h"
 #include "commands.h"
+#include "history.h"
 
 // Initialization
 int mode = MODE_NORMAL;
+
+editorConfig EE;
+editorConfig *E = &EE;
 
 void initCommands()
 {
@@ -37,6 +41,8 @@ void initCommands()
   registerCommand("!e", editorEditFile);
   registerCommand("wq", editorSaveQuit);
   registerCommand("!wq", editorSaveQuit);
+  registerCommand("u", editorUndo);
+  registerCommand("r", editorRedo);
 }
 
 //Data

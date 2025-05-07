@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "rows.h"
 #include "editor.h"
+#include "history.h"
 
 
 //Low-level terminal input
@@ -258,6 +259,9 @@ void editorProcessKeypress(void)
 
             E->selecting = 0;
           }
+        case 't':
+          { E = historyPush(E); }
+          break;
         case ARROW_RIGHT:
         case ARROW_DOWN:
         case ARROW_UP:
