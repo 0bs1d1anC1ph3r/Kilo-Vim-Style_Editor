@@ -16,7 +16,6 @@ editorConfig *copyEditorConfig(editorConfig *old) {
   new->screenRows = old->screenRows;
   new->screenCols = old->screenCols;
   new->numRows = old->numRows;
-  new->filename = old->filename;
   strncpy(new->statusMsg, old->statusMsg, sizeof(new->statusMsg));
   new->statusMsgTime = old->statusMsgTime;
   new->modified = old->modified;
@@ -26,6 +25,9 @@ editorConfig *copyEditorConfig(editorConfig *old) {
   new->selectBufLen = old->selectBufLen;
   new->newFile = old->newFile;
   new->orig_termios = old->orig_termios;
+
+  new->filename = xmalloc(strlen(old->filename) + 1);
+  strcpy(new->filename, old->filename);
 
   new->row = xmalloc(sizeof(erow) * old->numRows);
   for (int i = 0; i < new->numRows; i++) {
@@ -60,6 +62,10 @@ struct editorConfig *historyPush(struct editorConfig *snapshot) {
 
 struct editorConfig *historyUndo(struct editorConfig *E)
 {
+  if (E == NULL || E->undo == NULL) {
+    return E;
+  }
+
   if (E->undo) {
     return E->undo;
   }

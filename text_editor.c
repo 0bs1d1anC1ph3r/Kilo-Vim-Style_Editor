@@ -25,26 +25,28 @@
 #include "commands.h"
 
 // Cleanup
-void freeEditorConfig(struct editorConfig *E) {
-  if (!E) return;
+void freeEditorConfig(struct editorConfig *E)
+{
+  if (E == NULL) return;
+
   if (E->filename) {
     free(E->filename);
-  }
-  for (int i = 0; i < E->numRows; i++) {
-  if (E->row[i].chars) {
-    free(E->row[i].chars);
-  }
-
-  if (E->row[i].render) {
-    free(E->row[i].render);
-  }
-
-  }
-  if (E->row) {
-    free(E->row);
+    E->filename = NULL;
   }
   if (E->selectBuf) {
     free(E->selectBuf);
+    E->selectBuf = NULL;
+  }
+
+  if (E->row) {
+    for (int i = 0; i < E->numRows; i++) {
+      free(E->row[i].chars);
+      free(E->row[i].render);
+    }
+    free(E->row);
+  }
+  if (E != &EE) {
+    free(E);
   }
 }
 
@@ -536,31 +538,30 @@ void editorCommandMode(void)
 //Init
 void initEditor(struct editorConfig *E)
 {
-    E -> cx = 0;
-    E -> cy = 0;
-    E -> rx = 0;
-    E -> rowoff = 0;
-    E -> coloff = 0;
-    E -> numRows = 0;
-    E -> row = NULL;
-    E -> filename = NULL;
-    E -> statusMsg[0] = '\0';
-    E -> statusMsgTime = 0;
-    E -> modified = 0;
-    E -> selecting = 0;
-    E -> sel_sx = 0;
-    E -> sel_sy = 0;
-    E -> selectBuf = NULL;
-    E -> selectBufLen = 0;
-    E -> newFile = 0;
-    if (getWindowSize(&E -> screenRows, &E -> screenCols) == -2) {
-        explodeProgram("getWindowSize");
-    }
+  E->undo = NULL;
+  E->redo = NULL;
+  E -> cx = 0;
+  E -> cy = 0;
+  E -> rx = 0;
+  E -> rowoff = 0;
+  E -> coloff = 0;
+  E -> numRows = 0;
+  E -> row = NULL;
+  E -> filename = NULL;
+  E -> statusMsg[0] = '\0';
+  E -> statusMsgTime = 0;
+  E -> modified = 0;
+  E -> selecting = 0;
+  E -> sel_sx = 0;
+  E -> sel_sy = 0;
+  E -> selectBuf = NULL;
+  E -> selectBufLen = 0;
+  E -> newFile = 0;
+  if (getWindowSize(&E -> screenRows, &E -> screenCols) == -2) {
+    explodeProgram("getWindowSize");
+  }
+  E -> screenRows -= 2; // Do not forget about this just because it is here
 
-    E -> screenRows -= 2; // Do not forget about this just because it is here
-
-    E->undo = NULL;
-    E->redo = NULL;
 }
 
 int main(int argc, char *argv[])
