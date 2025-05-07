@@ -3,7 +3,7 @@ CC = clang
 CFLAGS = -std=c99 -Wall -Werror
 
 # Project files
-SRC = text_editor.c utils.c terminal.c rows.c input.c commands.c editor_commands.c history.c
+SRC = text_editor.c utils.c terminal.c rows.c input.c commands.c editor_commands.c
 OBJ = $(SRC:.c=.o)
 TARGET = text_editor
 

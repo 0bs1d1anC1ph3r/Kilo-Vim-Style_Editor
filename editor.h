@@ -41,10 +41,6 @@ typedef struct editorConfig
     int selectBufLen;
     _Bool newFile;
     struct termios orig_termios;
-
-    struct editorConfig *undo;
-    struct editorConfig *redo;
-
 } editorConfig;
 
 extern editorConfig EE;

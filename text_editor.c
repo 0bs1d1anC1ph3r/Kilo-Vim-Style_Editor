@@ -51,6 +51,7 @@ void freeEditorConfig(struct editorConfig *E)
 }
 
 void cleanupWrapper(void) {
+  disableRawMode();
   freeEditorConfig(E);
 }
 
@@ -70,8 +71,6 @@ void initCommands()
   registerCommand("!e", editorEditFile);
   registerCommand("wq", editorSaveQuit);
   registerCommand("!wq", editorSaveQuit);
-  registerCommand("u", editorUndo);
-  registerCommand("r", editorRedo);
 }
 
 //Data
@@ -538,8 +537,6 @@ void editorCommandMode(void)
 //Init
 void initEditor(struct editorConfig *E)
 {
-  E->undo = NULL;
-  E->redo = NULL;
   E -> cx = 0;
   E -> cy = 0;
   E -> rx = 0;

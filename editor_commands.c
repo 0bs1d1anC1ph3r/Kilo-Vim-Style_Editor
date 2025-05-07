@@ -21,7 +21,6 @@
 #include "editor.h"
 #include "config.h"
 #include "utils.h"
-#include "history.h"
 
 void editorQuit(_Bool forceQuit, const char *args, struct editorConfig *E)
 {
@@ -137,31 +136,4 @@ void editorEditFile(_Bool forceEdit, const char *args, struct editorConfig *E)
 
   editorOpen(filename);
   free(filename);
-}
-
-void editorUndo(_Bool force, const char *args, struct editorConfig **E)
-{
-  if (*E == NULL) {
-    explodeProgram("Null editorConfig passed to editorUndo");
-  }
-
-  if (args != NULL) {
-    editorSetStatusMessage("Invalid number of arguments");
-    return;
-  }
-
-  *E = historyUndo(*E);
-}
-
-void editorRedo(_Bool force, const char *args, struct editorConfig **E)
-{
-  if (*E == NULL) {
-    explodeProgram("Null editorConfig passed to editorUndo");
-  }
-
-  if (args != NULL) {
-    editorSetStatusMessage("Invalid number of arguments");
-    return;
-  }
-  *E = historyRedo(*E);
 }

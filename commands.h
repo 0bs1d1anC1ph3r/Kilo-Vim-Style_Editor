@@ -16,7 +16,5 @@ void editorSave(_Bool forceWrite, const char *args, struct editorConfig *E);
 void editorQuit(_Bool forceQuit, const char *args, struct editorConfig *E);
 void editorSaveQuit(_Bool forceWrite, const char *args, struct editorConfig *E);
 void editorEditFile(_Bool forceEdit, const char *args,  struct editorConfig *E);
-void editorUndo(_Bool force, const char *args, struct editorConfig *E);
-void editorRedo(_Bool force, const char *args, struct editorConfig *E);
 #endif
 

@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "editor.h"
 #include "utils.h"
@@ -22,7 +21,6 @@ void enableRawMode(void)
     if (tcgetattr(STDIN_FILENO, &E->orig_termios) == -1) {
         explodeProgram("tcgetattr");
     }
-    atexit(disableRawMode);
 
     struct termios raw = E->orig_termios;
     raw.c_iflag &= ~(IXON | ICRNL | BRKINT | INPCK | ISTRIP);
