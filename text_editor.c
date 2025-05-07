@@ -72,27 +72,21 @@ void cleanupWrapper(void) {
 //Data
 void editorCopyToClipboard(const char *text, size_t len)
 {
-  if (!text || len == 0) {
-    return;
+  const char *display = getenv("WAYLAND_DISPLAY");
+  FILE *pipe = NULL;
+
+  if (display) {
+    pipe = popen("wl-copy", "w");
+  } else {
+    pipe = popen("xclip -selection clipboard", "w");
   }
 
-  FILE *clipboard = popen("wl-copy", "w");
-  if (!clipboard) {
-    editorSetStatusMessage("Failed to open clipboard utility.");
-    return;
+  if (!pipe) {
+    editorSetStatusMessage("ERROR COPYING TO CLIPBOARD -- Only Wayland and Xorg (through xclip) works currently.");
   }
 
-  if (fwrite(text, len, 1, clipboard) != 1) {
-    editorSetStatusMessage("Failed to write to clipboard.");
-    pclose(clipboard);
-    return;
-  }
-
-  if (pclose(clipboard) == -1) {
-    editorSetStatusMessage("Failed to close clipboard utility.");
-    return;
-  }
-  editorSetStatusMessage("Copied %zu bytes to clipboard.", len);
+  fwrite(text, sizeof(char), len, pipe);
+  pclose(pipe);
 }
 
 //Editor opperations

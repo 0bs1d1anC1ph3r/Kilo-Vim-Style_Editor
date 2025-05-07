@@ -38,7 +38,7 @@ void editorUpdateRow(erow *row, int mod)
 
   free(row -> render);
   size_t alloc_size = row->size + tabs * (EASY_C_TAB_STOP - 1) + 1;
-  row->render = xmalloc(alloc_size ? alloc_size : 1);
+  row->render = xmalloc(alloc_size ? alloc_size : 1, 0);
 
   int idx = 0;
 
@@ -73,7 +73,7 @@ void editorAppendRow(int at, char *s, size_t len)
 
   E->row[at].capacity = len + 1;
   E->row[at].size = len;
-  E->row[at].chars = xmalloc(len + 1);
+  E->row[at].chars = xmalloc(len + 1, 0);
 
   if (len > 0) {
     memcpy(E->row[at].chars, s, len);
@@ -161,7 +161,7 @@ char *editorRowsToString(int *bufLen)
   *bufLen = totalLen;
   totalLen++;
 
-  buf = xmalloc(totalLen);
+  buf = xmalloc(totalLen, 1);
   p = buf;
 
   for (j = 0; j < E->numRows; j++) {
