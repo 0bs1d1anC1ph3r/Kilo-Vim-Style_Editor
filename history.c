@@ -6,6 +6,7 @@ history H;
 
 editorConfig *copyEditorConfig(editorConfig *old) {
   editorConfig *new = xmalloc(sizeof(editorConfig));
+  memset(new, 0, sizeof(editorConfig));
 
   new->cx = old->cx;
   new->cy = old->cy;
@@ -67,6 +68,11 @@ struct editorConfig *historyUndo(struct editorConfig *E)
 
 struct editorConfig *historyRedo(struct editorConfig *E)
 {
+  if (E->redo == NULL) {
+    editorSetStatusMessage("Redo stack is empty");
+    return E;
+  }
+
   if (E->redo) {
     return E->redo;
   }

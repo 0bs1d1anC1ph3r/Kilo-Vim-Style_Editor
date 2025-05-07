@@ -3,7 +3,7 @@
 
 #include "editor.h"
 
-typedef struct history 
+typedef struct history
 {
   editorConfig *buffer[5];
   int size;

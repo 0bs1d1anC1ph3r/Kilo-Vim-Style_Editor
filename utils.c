@@ -20,6 +20,7 @@ void *xmalloc(size_t size)
     explodeProgram("malloc");
   }
 
+  memset(p, 0, size);
   return p;
 }
 

@@ -24,6 +24,34 @@
 #include "input.h"
 #include "commands.h"
 
+// Cleanup
+void freeEditorConfig(struct editorConfig *E) {
+  if (!E) return;
+  if (E->filename) {
+    free(E->filename);
+  }
+  for (int i = 0; i < E->numRows; i++) {
+  if (E->row[i].chars) {
+    free(E->row[i].chars);
+  }
+
+  if (E->row[i].render) {
+    free(E->row[i].render);
+  }
+
+  }
+  if (E->row) {
+    free(E->row);
+  }
+  if (E->selectBuf) {
+    free(E->selectBuf);
+  }
+}
+
+void cleanupWrapper(void) {
+  freeEditorConfig(E);
+}
+
 // Initialization
 int mode = MODE_NORMAL;
 
@@ -191,6 +219,7 @@ void editorOpen(char *filename)
   E->cx = 0; //Set cursor position to the top left of the file
   E->cy = 0;
 
+  free(E->filename);
   E->filename = strdup(filename); // Filename
   E->modified = 0; // Set file to be unmodified
   E->newFile = 0;
@@ -538,6 +567,7 @@ int main(int argc, char *argv[])
 {
   enableRawMode();
   initEditor(E);
+  atexit(cleanupWrapper);
   initCommands();
 
   if (argc >= 2) {

@@ -136,6 +136,7 @@ void editorEditFile(_Bool forceEdit, const char *args, struct editorConfig *E)
   }
 
   editorOpen(filename);
+  free(filename);
 }
 
 void editorUndo(_Bool force, const char *args, struct editorConfig **E)
