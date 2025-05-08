@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "rows.h"
 #include "editor.h"
+#include "linear_undo.h"
 
 //Low-level terminal input
 int editorReadKey(void)
@@ -158,6 +159,9 @@ void editorProcessKeypress(void)
           case BACKSPACE:
           case CTRL_KEY('h'):
           case DEL_KEY: {
+            pushUndoState(&undoStack, E);
+            clearUndoStack(&redoStack);
+
             if (c == DEL_KEY) {
               editorMoveCursor(ARROW_RIGHT);
             }
@@ -165,9 +169,13 @@ void editorProcessKeypress(void)
             break;
           }
           case '\r':
+            pushUndoState(&undoStack, E);
+            clearUndoStack(&redoStack);
             editorInsertNewLine();
             break;
           default: {
+            pushUndoState(&undoStack, E);
+            clearUndoStack(&redoStack);
             editorInsertChar(c);
             break;
           }
@@ -266,12 +274,16 @@ void editorProcessKeypress(void)
           break;
         case 'd':
           if (E->selecting) {
+            pushUndoState(&undoStack, E);
+            clearUndoStack(&redoStack);
             editorDelSelected();
             E->selecting = 0;
           }
           break;
         case 'x':
           if (E->selecting) {
+            pushUndoState(&undoStack, E);
+            clearUndoStack(&redoStack);
             editorBufferSelection();
             if (E->selectBuf && E->selectBufLen > 0) {
               editorCopyToClipboard(E->selectBuf, E->selectBufLen);
@@ -283,6 +295,12 @@ void editorProcessKeypress(void)
 
             E->selecting = 0;
           }
+          break;
+        case 'f':
+          performUndo(&undoStack, &redoStack, E);
+          break;
+        case 'g':
+          performRedo(&redoStack, &undoStack, E);
           break;
         case ARROW_RIGHT:
         case ARROW_DOWN:

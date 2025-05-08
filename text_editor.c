@@ -23,9 +23,13 @@
 #include "utils.h"
 #include "input.h"
 #include "commands.h"
+#include "linear_undo.h"
 
 // Initialization
 editorConfig *E = NULL;
+UndoStack undoStack = {NULL};
+UndoStack redoStack = {NULL};
+
 int mode = MODE_NORMAL;
 
 void initCommands()
