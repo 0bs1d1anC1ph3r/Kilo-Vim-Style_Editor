@@ -43,7 +43,7 @@ static void restoreEditorState(editorConfig *E, const UndoState *state)
     E->row[i].capacity = state->row[i].capacity;
     E->row[i].rsize = state->row[i].rsize;
     E->row[i].render = xmalloc(state->row[i].rsize + 1, 1);
-    memcpy(E->row[i].render, state->row[i].render, state->row[i].rsize);
+    memcpy(E->row[i].render, state->row[i].render, state->row[i].rsize + 1);
     E->row[i].chars = xmalloc(state->row[i].size + 1, 1);
     memcpy(E->row[i].chars, state->row[i].chars, state->row[i].size + 1);
   }

@@ -70,6 +70,8 @@ void freeEditorConfig(struct editorConfig *E)
 
 void cleanupWrapper(void) {
   disableRawMode();
+  clearUndoStack(&undoStack);
+  clearUndoStack(&redoStack);
   freeEditorConfig(E);
 }
 
@@ -214,6 +216,9 @@ void editorInsertNewLine(void)
 //File I/O
 void editorOpen(char *filename)
 {
+  clearUndoStack(&undoStack);
+  clearUndoStack(&redoStack);
+
   while (E->numRows > 0) { // Delete all rows from buffer
     editorDelRow(E->numRows - 1);
   }
