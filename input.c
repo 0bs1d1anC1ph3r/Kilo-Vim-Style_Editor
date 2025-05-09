@@ -7,6 +7,46 @@
 #include "rows.h"
 #include "editor.h"
 #include "linear_undo.h"
+#include "row_change_undo.h"
+#include "config.h"
+
+// Undo config thing
+void undoTypeToPush()
+{
+  if (UNDO_REDO_TYPE == 1) {
+    pushUndoState(&undoStack, E);
+    clearUndoStack(&redoStack);
+  } else if (UNDO_REDO_TYPE == 2) {
+    RowState state;
+    state.row_index = E->cy;
+    state.oldContent = E->row[E->cy].chars;
+    state.newContent = NULL;
+    pushRowUndoStep(&undoRowStack, &state, 1, E->cx, E->cy);
+    clearRowUndoStack(&redoRowStack);
+  } else {
+    return;
+  }
+}
+
+void undoTypeRedoUndo(_Bool undo)
+{
+  if (UNDO_REDO_TYPE == 1) {
+    if (undo) {
+      performUndo(&undoStack, &redoStack, E);
+    } else {
+      performRedo(&redoStack, &undoStack, E);
+    }
+  } else if (UNDO_REDO_TYPE == 2) {
+    if (undo) {
+      performRowUndo(&undoRowStack, &redoRowStack, E);
+    } else {
+      // Implement redo
+      return;
+    }
+  } else {
+    return;
+  }
+}
 
 //Low-level terminal input
 int editorReadKey(void)
@@ -159,8 +199,7 @@ void editorProcessKeypress(void)
           case BACKSPACE:
           case CTRL_KEY('h'):
           case DEL_KEY: {
-            pushUndoState(&undoStack, E);
-            clearUndoStack(&redoStack);
+            undoTypeToPush();
 
             if (c == DEL_KEY) {
               editorMoveCursor(ARROW_RIGHT);
@@ -169,8 +208,7 @@ void editorProcessKeypress(void)
             break;
           }
           case '\r':
-            pushUndoState(&undoStack, E);
-            clearUndoStack(&redoStack);
+            undoTypeToPush();
             editorInsertNewLine();
             break;
           default: {
@@ -263,16 +301,19 @@ void editorProcessKeypress(void)
           break;
         case 'd':
           if (E->selecting) {
-            pushUndoState(&undoStack, E);
-            clearUndoStack(&redoStack);
+            if (UNDO_REDO_TYPE == 1) {
+              undoTypeToPush();
+            }
+
             editorDelSelected();
             E->selecting = 0;
           }
           break;
         case 'x':
           if (E->selecting) {
-            pushUndoState(&undoStack, E);
-            clearUndoStack(&redoStack);
+            if (UNDO_REDO_TYPE == 1) {
+              undoTypeToPush();
+            }
             editorBufferSelection();
             if (E->selectBuf && E->selectBufLen > 0) {
               editorCopyToClipboard(E->selectBuf, E->selectBufLen);
@@ -286,10 +327,10 @@ void editorProcessKeypress(void)
           }
           break;
         case 'f':
-          performUndo(&undoStack, &redoStack, E);
+          undoTypeRedoUndo(1);
           break;
         case 'g':
-          performRedo(&redoStack, &undoStack, E);
+          undoTypeRedoUndo(1);
           break;
         case ARROW_RIGHT:
         case ARROW_DOWN:

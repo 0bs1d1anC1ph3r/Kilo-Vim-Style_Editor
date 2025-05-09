@@ -4,6 +4,7 @@
 #include "linear_undo.h"
 #include "editor.h"
 #include "utils.h"
+#include "config.h"
 
 static UndoState *copyEditorState(const editorConfig *E, Arena *a)
 {
@@ -53,16 +54,14 @@ static void restoreEditorState(editorConfig *E, const UndoState *state)
 void pushUndoState(UndoStack *stack, const editorConfig *E)
 {
   UndoStackNode *node = xmalloc(sizeof(UndoStackNode), 1);
-  node->arena = arena_create(4096 * 10, 1);
+  node->arena = arena_create(ARENA_MEM_ALLOC_NUM * 10, 1);
   node->state = copyEditorState(E, node->arena);
   node->next = stack->top;
   stack->top = node;
 
-  int count = 0;
   UndoStackNode *current = stack->top;
   UndoStackNode *prev = NULL;
   while (current) {
-    count++;
     if (prev) prev->next = NULL;
     clearUndoStack(&(UndoStack){ .top = current });
     break;

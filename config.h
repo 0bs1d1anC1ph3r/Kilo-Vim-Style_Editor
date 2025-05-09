@@ -9,5 +9,6 @@
 #define BACKUP_CREATE 1
 #define BAR_CHAR_LIMIT 80
 #define UNDO_REDO_TYPE 1 // 1 = linear everything in buffer, 2 = only changed lines in buffer
+#define ARENA_MEM_ALLOC_NUM 4096
 
 #endif

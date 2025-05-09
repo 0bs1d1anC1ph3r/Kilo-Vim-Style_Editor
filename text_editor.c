@@ -24,11 +24,15 @@
 #include "input.h"
 #include "commands.h"
 #include "linear_undo.h"
+#include "row_change_undo.h"
 
 // Initialization
 editorConfig *E = NULL;
 UndoStack undoStack = {NULL};
 UndoStack redoStack = {NULL};
+
+UndoRowStack redoRowStack = {NULL};
+UndoRowStack undoRowStack = {NULL};
 
 int mode = MODE_NORMAL;
 
@@ -72,6 +76,8 @@ static void cleanupWrapper(void) {
   disableRawMode();
   clearUndoStack(&undoStack);
   clearUndoStack(&redoStack);
+  clearRowUndoStack(&redoRowStack);
+  clearRowUndoStack(&undoRowStack);
   freeEditorConfig(E);
 }
 
