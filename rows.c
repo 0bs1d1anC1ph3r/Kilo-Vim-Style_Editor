@@ -86,6 +86,7 @@ void editorAppendRow(int at, const char *s, size_t len)
   editorUpdateRow(&E->row[at], 0);
 
   E->numRows++;
+  editorIndexRows();
 }
 
 void editorDelRow(int at)
@@ -100,6 +101,7 @@ void editorDelRow(int at)
 
   memmove(&E->row[at], &E->row[at + 1], sizeof(erow) * (E->numRows - at - 1));
   E->numRows--;
+  editorIndexRows();
 }
 
 void editorRowInsertChar(erow *row, int at, int c)

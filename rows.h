@@ -3,7 +3,6 @@
 
 #include <stddef.h>
 
-
 typedef struct erow
 {
   int index;

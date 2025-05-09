@@ -96,6 +96,13 @@ void editorCopyToClipboard(const char *text, size_t len)
 }
 
 //Editor opperations
+void editorIndexRows(void)
+{
+  for (int i = 0; i < E->numRows; i++) {
+    E->row[i].index = i;
+  }
+}
+
 void editorInsertChar(int c)
 {
   if (E->cy == E->numRows) {
@@ -193,6 +200,7 @@ void editorDelSelected(void)
   E->cy = startY;
   E->cx = startX;
   E->modified++;
+  editorIndexRows();
 }
 
 
@@ -400,7 +408,7 @@ static void editorDrawStatusBar(struct abuf *ab)
       modeName, newFile ,E->filename ? E->filename : "[No Name]", E->numRows,
       E->modified ? "(modified)" : "");
   int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d:%d/%d",
-      E->cy + 1, E->numRows, E->rx + 1, (E->row[E->cy].rsize) + 1);
+      E->row[E->cy].index + 1, E->numRows, E->rx + 1, (E->row[E->cy].rsize) + 1);
   if (len > E->screenCols) {
     len = E->screenCols;
   }
@@ -547,7 +555,6 @@ static void initEditor(struct editorConfig *E)
   E->selectBuf = NULL;
   E->selectBufLen = 0;
   E->newFile = 0;
-  E->row->index = 0;
   if (getWindowSize(&E->screenRows,&E->screenCols) == -2) {
     explodeProgram("getWindowSize");
   }

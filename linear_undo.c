@@ -5,8 +5,6 @@
 #include "editor.h"
 #include "utils.h"
 
-#define UNDO_STACK_LIMIT 100
-
 static UndoState *copyEditorState(const editorConfig *E, Arena *a)
 {
   UndoState *state = arena_alloc(a, sizeof(UndoState));
@@ -65,14 +63,12 @@ void pushUndoState(UndoStack *stack, const editorConfig *E)
   UndoStackNode *prev = NULL;
   while (current) {
     count++;
-    if (count > UNDO_STACK_LIMIT) {
-      if (prev) prev->next = NULL;
-      clearUndoStack(&(UndoStack){ .top = current });
-      break;
-    }
-    prev = current;
-    current = current->next;
+    if (prev) prev->next = NULL;
+    clearUndoStack(&(UndoStack){ .top = current });
+    break;
   }
+  prev = current;
+  current = current->next;
 }
 
 static UndoStackNode *popUndoNode(UndoStack *stack)

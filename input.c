@@ -249,20 +249,9 @@ void editorProcessKeypress(void)
           break;
         case CTRL_KEY('y'):
           if (E->selecting) {
-            fprintf(stderr, "Yank initiated. Selection active.\n");
             editorBufferSelection();
-
-            if (E->selectBuf) {
-              fprintf(stderr, "Buffered Text: %s\n", E->selectBuf);
-            } else {
-              fprintf(stderr, "No text buffered. Buffer is NULL.\n");
-            }
-
             if (E->selectBuf && E->selectBufLen > 0) {
               editorCopyToClipboard(E->selectBuf, E->selectBufLen);
-
-              fprintf(stderr, "Yank completed successfully.\n");
-
             } else {
               editorSetStatusMessage("Nothing selected to copy.");
             }

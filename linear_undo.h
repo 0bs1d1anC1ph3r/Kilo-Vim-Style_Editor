@@ -19,7 +19,8 @@ typedef struct UndoStackNode
   Arena *arena;
 } UndoStackNode;
 
-typedef struct UndoStack{
+typedef struct UndoStack
+{
   UndoStackNode *top;
 } UndoStack;
 

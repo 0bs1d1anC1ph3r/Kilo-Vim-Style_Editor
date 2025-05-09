@@ -62,6 +62,7 @@ enum editorKey {
 void editorOpen(const char *filename);
 
 // Editor operations
+void editorIndexRows(void);
 void editorInsertChar(int c);
 void editorDelChar(void);
 void editorInsertNewLine(void);
