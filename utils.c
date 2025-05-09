@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "utils.h"
+
 //Error handling
 void explodeProgram(const char *string)
 {
@@ -37,13 +39,37 @@ void *xrealloc(void *ptr, size_t size)
   return p;
 }
 
-// Append buffer
-struct abuf
+// Memory Arena
+Arena *arena_create(size_t capacity, _Bool zero)
 {
-    char *b;
-    int len;
-    int capacity;
-};
+  Arena *a = xmalloc(sizeof(Arena), zero);
+  a->base = xmalloc(capacity, zero);
+  a->used = 0;
+  a->capacity = capacity;
+  return a;
+}
+
+void *arena_alloc(Arena *a, size_t size)
+{
+  if (a->used + size > a->capacity) {
+    return NULL;
+  }
+
+  void *ptr = a->base + a->used;
+  a->used += size;
+  return ptr;
+}
+
+void arena_reset(Arena *a)
+{
+  a->used = 0;
+}
+
+void arena_free(Arena *a)
+{
+  free(a->base);
+  free(a);
+}
 
 // Append to buffer
 void abAppend(struct abuf *ab, const char *s, int len)

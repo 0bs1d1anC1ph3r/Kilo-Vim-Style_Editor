@@ -36,7 +36,7 @@ void enableRawMode(void)
 }
 
 //Cursor position
-int getCursorPosition(int *rows, int *cols)
+static int getCursorPosition(int *rows, int *cols)
 {
     char buf[32];
     unsigned int i = 0;

@@ -7,13 +7,13 @@
 #include "rows.h"
 
 //Row opperations
-int editorRowCxToRx(erow *row, int cx)
+int editorRowCxToRx(const erow *row, int cx)
 {
   int rx = 0;
   int j;
 
   for (j = 0; j < cx; j++) {
-    if (row -> chars[j] == '\t') {
+    if (row->chars[j] == '\t') {
       rx += (EASY_C_TAB_STOP - 1) - (rx % EASY_C_TAB_STOP);
     }
     rx++;
@@ -21,7 +21,7 @@ int editorRowCxToRx(erow *row, int cx)
   return rx;
 }
 
-void editorUpdateRow(erow *row, int mod)
+void editorUpdateRow(erow *row, const int mod)
 {
   int tabs = 0;
   int j;
@@ -30,31 +30,31 @@ void editorUpdateRow(erow *row, int mod)
     return;
   }
 
-  for (j = 0; j < row -> size; j++) {
-    if (row -> chars[j] == '\t') {
+  for (j = 0; j < row->size; j++) {
+    if (row->chars[j] == '\t') {
       tabs++;
     }
   }
 
-  free(row -> render);
+  free(row->render);
   size_t alloc_size = row->size + tabs * (EASY_C_TAB_STOP - 1) + 1;
   row->render = xmalloc(alloc_size ? alloc_size : 1, 0);
 
   int idx = 0;
 
-  for (j = 0; j < row -> size; j++) {
-    if (row -> chars[j] == '\t') {
-      row -> render[idx++] = ' ';
+  for (j = 0; j < row->size; j++) {
+    if (row->chars[j] == '\t') {
+      row->render[idx++] = ' ';
 
       while (idx % EASY_C_TAB_STOP != 0) {
-        row -> render[idx++] = ' ';
+        row->render[idx++] = ' ';
       }
     } else {
-      row -> render[idx++] = row -> chars[j];
+      row->render[idx++] = row->chars[j];
     }
   }
-  row -> render[idx] = 0;
-  row -> rsize = idx;
+  row->render[idx] = 0;
+  row->rsize = idx;
 
   if (mod)
   {
@@ -62,7 +62,7 @@ void editorUpdateRow(erow *row, int mod)
   }
 }
 
-void editorAppendRow(int at, char *s, size_t len)
+void editorAppendRow(int at, const char *s, size_t len)
 {
   if (at < 0 || at > E->numRows) {
     return;
@@ -95,8 +95,8 @@ void editorDelRow(int at)
   }
 
   erow *row = &E->row[at];
-  free(row -> chars);
-  free(row -> render);
+  free(row->chars);
+  free(row->render);
 
   memmove(&E->row[at], &E->row[at + 1], sizeof(erow) * (E->numRows - at - 1));
   E->numRows--;
@@ -139,7 +139,7 @@ void editorRowDelChar(erow *row, int at)
   editorUpdateRow(row, 1);
 }
 
-void editorRowAppendString(erow *row, char *s, size_t len)
+void editorRowAppendString(erow *row, const char *s, size_t len)
 {
   row->chars = xrealloc(row->chars, row->size + len + 1);
   memcpy(&row->chars[row->size], s, len);

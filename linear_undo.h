@@ -3,6 +3,7 @@
 
 #include "rows.h"
 #include "editor.h"
+#include "utils.h"
 
 typedef struct UndoState
 {
@@ -15,6 +16,7 @@ typedef struct UndoStackNode
 {
   UndoState *state;
   struct UndoStackNode *next;
+  Arena *arena;
 } UndoStackNode;
 
 typedef struct UndoStack{
@@ -25,8 +27,6 @@ extern UndoStack redoStack;
 extern UndoStack undoStack;
 
 void pushUndoState(UndoStack *stack, const editorConfig *E);
-UndoState *popUndoState(UndoStack *stack);
-void freeUndoState(UndoState *state);
 void clearUndoStack(UndoStack *stack);
 void performUndo(UndoStack *undoStack, UndoStack *redoStack, editorConfig *E);
 void performRedo(UndoStack *redoStack, UndoStack *undoStack, editorConfig *E);

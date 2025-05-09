@@ -32,7 +32,7 @@ UndoStack redoStack = {NULL};
 
 int mode = MODE_NORMAL;
 
-void initCommands()
+static void initCommands()
 {
   registerCommand("w", editorSave);
   registerCommand("!w", editorSave);
@@ -45,7 +45,7 @@ void initCommands()
 }
 
 // Cleanup
-void freeEditorConfig(struct editorConfig *E)
+static void freeEditorConfig(struct editorConfig *E)
 {
   if (E == NULL) return;
 
@@ -68,7 +68,7 @@ void freeEditorConfig(struct editorConfig *E)
     free(E);
 }
 
-void cleanupWrapper(void) {
+static void cleanupWrapper(void) {
   disableRawMode();
   clearUndoStack(&undoStack);
   clearUndoStack(&redoStack);
@@ -128,7 +128,7 @@ void editorDelChar(void)
   }
 }
 
-_Bool editorIsSelected(int fileRow, int fileCol)
+static _Bool editorIsSelected(int fileRow, int fileCol)
 {
   if (!E->selecting) {
     return 0;
@@ -165,10 +165,9 @@ void editorDelSelected(void)
   int endX = E->cx;
 
   if (startY > endY || (startY == endY && startX > endX)) {
-    int tmpX = startX, tmpY = startY;
+    int tmpY = startY;
     startX = endX;
     startY = endY;
-    endX = tmpX;
     endY = tmpY;
   }
   for (int y = startY; y <= endY && y < E->numRows;) {
@@ -214,7 +213,7 @@ void editorInsertNewLine(void)
 }
 
 //File I/O
-void editorOpen(char *filename)
+void editorOpen(const char *filename)
 {
   clearUndoStack(&undoStack);
   clearUndoStack(&redoStack);
@@ -305,7 +304,7 @@ void editorBufferSelection(void)
 }
 
 //Output
-void editorScroll(void)
+static void editorScroll(void)
 {
   E->rx = 0;
   if (E->cy < E->numRows) {
@@ -326,7 +325,7 @@ void editorScroll(void)
   }
 }
 
-void editorDrawRows(struct abuf *ab)
+static void editorDrawRows(struct abuf *ab)
 {
   int y;
   for (y = 0; y < E->screenRows; y++) {
@@ -390,7 +389,7 @@ void editorDrawRows(struct abuf *ab)
   }
 }
 
-void editorDrawStatusBar(struct abuf *ab)
+static void editorDrawStatusBar(struct abuf *ab)
 {
   abAppend(ab, "\x1b[7m", 4);
   char status[BAR_CHAR_LIMIT], rstatus[BAR_CHAR_LIMIT];
@@ -421,7 +420,7 @@ void editorDrawStatusBar(struct abuf *ab)
   abAppend(ab, "\r\n", 2);
 }
 
-void editorDrawMessageBar(struct abuf *ab)
+static void editorDrawMessageBar(struct abuf *ab)
 {
   abAppend(ab, "\x1b[K", 3);
   int msgLen = strlen(E->statusMsg);
@@ -433,7 +432,7 @@ void editorDrawMessageBar(struct abuf *ab)
 
   if (msgLen > 0) {
     char timebuf[16];
-    struct tm *tm = localtime(&E->statusMsgTime);
+    const struct tm *tm = localtime(&E->statusMsgTime);
     strftime(timebuf, sizeof(timebuf), "[%H:%M:%S] -- ", tm);
 
     abAppend(ab, timebuf, strlen(timebuf));
@@ -442,7 +441,7 @@ void editorDrawMessageBar(struct abuf *ab)
 
 }
 
-void editorUpdateCursor(void)
+static void editorUpdateCursor(void)
 {
   switch (mode)
   {
@@ -460,7 +459,7 @@ void editorUpdateCursor(void)
   }
 }
 
-void editorRefreshScreen(void)
+static void editorRefreshScreen(void)
 {
   editorScroll();
   editorUpdateCursor();
@@ -494,27 +493,6 @@ void editorSetStatusMessage(const char *fmt, ...)
 }
 
 //Command handler
-void editFile(const char *cmd, int cmdlen)
-{
-  const char *filename = cmd + cmdlen;
-
-  while (*filename == ' ') {
-    filename++;
-  }
-
-  if (*filename == '\0') {
-    editorSetStatusMessage("Error: No filename provided");
-  } else {
-    editorOpen((char *) filename);
-
-    if (E->newFile) {
-      editorSetStatusMessage("New File Created: %s", filename);
-    } else {
-      editorSetStatusMessage("Opened file: %s", filename);
-    }
-  }
-}
-
 void editorCommandMode(void)
 {
   char cmd[BAR_CHAR_LIMIT - 1] = {0};
@@ -550,29 +528,30 @@ void editorCommandMode(void)
 }
 
 //Init
-void initEditor(struct editorConfig *E)
+static void initEditor(struct editorConfig *E)
 {
-  E -> cx = 0;
-  E -> cy = 0;
-  E -> rx = 0;
-  E -> rowoff = 0;
-  E -> coloff = 0;
-  E -> numRows = 0;
-  E -> row = NULL;
-  E -> filename = NULL;
-  E -> statusMsg[0] = '\0';
-  E -> statusMsgTime = 0;
-  E -> modified = 0;
-  E -> selecting = 0;
-  E -> sel_sx = 0;
-  E -> sel_sy = 0;
-  E -> selectBuf = NULL;
-  E -> selectBufLen = 0;
-  E -> newFile = 0;
-  if (getWindowSize(&E -> screenRows, &E -> screenCols) == -2) {
+  E->cx = 0;
+  E->cy = 0;
+  E->rx = 0;
+  E->rowoff = 0;
+  E->coloff = 0;
+  E->numRows = 0;
+  E->row = NULL;
+  E->filename = NULL;
+  E->statusMsg[0] = '\0';
+  E->statusMsgTime = 0;
+  E->modified = 0;
+  E->selecting = 0;
+  E->sel_sx = 0;
+  E->sel_sy = 0;
+  E->selectBuf = NULL;
+  E->selectBufLen = 0;
+  E->newFile = 0;
+  E->row->index = 0;
+  if (getWindowSize(&E->screenRows,&E->screenCols) == -2) {
     explodeProgram("getWindowSize");
   }
-  E -> screenRows -= 2; // Do not forget about this just because it is here
+  E->screenRows -= 2; // Do not forget about this just because it is here
 
 }
 
@@ -592,7 +571,7 @@ int main(int argc, char *argv[])
   if (argc >= 2) {
     editorOpen(argv[1]);
   } else {
-    char *fileName = "MainMenu.txt";
+    const char *fileName = "MainMenu.txt";
     editorOpen(fileName);
   }
 

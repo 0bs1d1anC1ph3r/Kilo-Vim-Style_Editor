@@ -15,6 +15,6 @@ void executeCommand(const char *cmd);
 void editorSave(_Bool forceWrite, const char *args, struct editorConfig *E);
 void editorQuit(_Bool forceQuit, const char *args, struct editorConfig *E);
 void editorSaveQuit(_Bool forceWrite, const char *args, struct editorConfig *E);
-void editorEditFile(_Bool forceEdit, const char *args,  struct editorConfig *E);
+void editorEditFile(_Bool forceEdit, const char *args, struct editorConfig *E);
 #endif
 

@@ -10,6 +10,19 @@ void explodeProgram (const char *string);
 void *xmalloc (size_t size, _Bool zero);
 void *xrealloc (void *ptr, size_t size);
 
+// Arena memory handling
+typedef struct
+{
+  char *base;
+  size_t used;
+  size_t capacity;
+} Arena;
+
+Arena *arena_create(size_t capacity, _Bool zero);
+void *arena_alloc(Arena *a, size_t size);
+void arena_reset(Arena *a);
+void arena_free(Arena *a);
+
 // Append buffer operations
 struct abuf {
     char *b;

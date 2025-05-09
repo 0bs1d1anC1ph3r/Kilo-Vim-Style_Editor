@@ -3,7 +3,6 @@
 
 void disableRawMode(void);
 void enableRawMode(void);
-int getCursorPosition(int *rows, int *cols);
 int getWindowSize(int *rows, int *cols);
 
 #endif

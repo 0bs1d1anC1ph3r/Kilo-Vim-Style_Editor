@@ -7,21 +7,24 @@
 
 #define UNDO_STACK_LIMIT 100
 
-static UndoState *copyEditorState(const editorConfig *E)
+static UndoState *copyEditorState(const editorConfig *E, Arena *a)
 {
-  UndoState *state = xmalloc(sizeof(UndoState), 1);
+  UndoState *state = arena_alloc(a, sizeof(UndoState));
   state->numRows = E->numRows;
   state->cx = E->cx;
   state->cy = E->cy;
-  state->row = xmalloc(sizeof(erow) * state->numRows, 1);
+  state->row = arena_alloc(a, sizeof(erow) * (size_t)state->numRows);
   for (int i = 0; i < state->numRows; i++) {
-    state->row[i].size = E->row[i].size;
-    state->row[i].capacity = E->row[i].capacity;
-    state->row[i].rsize = E->row[i].rsize;
-    state->row[i].render = xmalloc(E->row[i].rsize + 1, 1);
-    memcpy(state->row[i].render, E->row[i].render, E->row[i].rsize);
-    state->row[i].chars = xmalloc(E->row[i].size + 1, 1);
-    memcpy(state->row[i].chars, E->row[i].chars, E->row[i].size + 1);
+    const erow *source = &E->row[i];
+    erow *destination = &state->row[i];
+
+    destination->size = source->size;
+    destination->capacity = source->capacity;
+    destination->rsize = source->rsize;
+    destination->render = arena_alloc(a, (size_t)source->rsize + 1);
+    memcpy(destination->render, source->render, source->rsize + 1);
+    destination->chars = arena_alloc(a, (size_t)source->size + 1);
+    memcpy(destination->chars, source->chars, (size_t)source->size + 1);
   }
   return state;
 }
@@ -52,7 +55,8 @@ static void restoreEditorState(editorConfig *E, const UndoState *state)
 void pushUndoState(UndoStack *stack, const editorConfig *E)
 {
   UndoStackNode *node = xmalloc(sizeof(UndoStackNode), 1);
-  node->state = copyEditorState(E);
+  node->arena = arena_create(4096 * 10, 1);
+  node->state = copyEditorState(E, node->arena);
   node->next = stack->top;
   stack->top = node;
 
@@ -71,26 +75,20 @@ void pushUndoState(UndoStack *stack, const editorConfig *E)
   }
 }
 
-UndoState *popUndoState(UndoStack *stack)
+static UndoStackNode *popUndoNode(UndoStack *stack)
 {
   if (!stack->top) {
     return NULL;
   }
   UndoStackNode *node = stack->top;
-  UndoState *state = node->state;
   stack->top = node->next;
-  free(node);
-  return state;
+  return node;
 }
 
-void freeUndoState(UndoState *state)
+static void freeUndoNode(UndoStackNode *node)
 {
-  for (int i = 0; i < state->numRows; i++) {
-    free(state->row[i].chars);
-    free(state->row[i].render);
-  }
-  free(state->row);
-  free(state);
+  arena_free(node->arena);
+  free(node);
 }
 
 void clearUndoStack(UndoStack *stack)
@@ -98,25 +96,24 @@ void clearUndoStack(UndoStack *stack)
   UndoStackNode *node = stack->top;
   while (node) {
     UndoStackNode *next = node->next;
-    freeUndoState(node->state);
-    free(node);
+    freeUndoNode(node);
     node = next;
   }
   stack->top = NULL;
 }
 
 void performUndo(UndoStack *undoStack, UndoStack *redoStack, editorConfig *E) {
-  UndoState *state = popUndoState(undoStack);
-  if (!state) return;
+  UndoStackNode *node = popUndoNode(undoStack);
+  if (!node) return;
   pushUndoState(redoStack, E);
-  restoreEditorState(E, state);
-  freeUndoState(state);
+  restoreEditorState(E, node->state);
+  freeUndoNode(node);
 }
 
 void performRedo(UndoStack *redoStack, UndoStack *undoStack, editorConfig *E) {
-  UndoState *state = popUndoState(redoStack);
-  if (!state) return;
+  UndoStackNode *node = popUndoNode(redoStack);
+  if (!node) return;
   pushUndoState(undoStack, E);
-  restoreEditorState(E, state);
-  freeUndoState(state);
+  restoreEditorState(E, node->state);
+  freeUndoNode(node);
 }

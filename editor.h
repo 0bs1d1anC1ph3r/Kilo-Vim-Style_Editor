@@ -59,7 +59,7 @@ enum editorKey {
 };
 
 // File I/O
-void editorOpen(char *filename);
+void editorOpen(const char *filename);
 
 // Editor operations
 void editorInsertChar(int c);
@@ -72,8 +72,6 @@ void editorCopyToClipboard(const char *text, size_t len);
 void editorBufferSelection(void);
 
 // Screen rendering
-void editorRefreshScreen(void);
-void editorScroll(void);
 void editorSetStatusMessage(const char *fmt, ...);
 
 // Command mode

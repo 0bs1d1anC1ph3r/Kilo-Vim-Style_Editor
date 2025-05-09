@@ -76,9 +76,9 @@ int editorReadKey(void)
     }
 }
 
-void editorMoveCursor(int key)
+static void editorMoveCursor(int key)
 {
-  erow *row;
+  const erow *row;
   if (E->cy >= E->numRows) {
     row = NULL;
   } else {
