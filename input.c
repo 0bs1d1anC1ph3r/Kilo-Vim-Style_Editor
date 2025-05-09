@@ -330,7 +330,7 @@ void editorProcessKeypress(void)
           undoTypeRedoUndo(1);
           break;
         case 'g':
-          undoTypeRedoUndo(1);
+          undoTypeRedoUndo(0);
           break;
         case ARROW_RIGHT:
         case ARROW_DOWN:

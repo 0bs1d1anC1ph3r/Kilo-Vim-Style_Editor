@@ -74,10 +74,15 @@ static void freeEditorConfig(struct editorConfig *E)
 
 static void cleanupWrapper(void) {
   disableRawMode();
-  clearUndoStack(&undoStack);
-  clearUndoStack(&redoStack);
-  clearRowUndoStack(&redoRowStack);
-  clearRowUndoStack(&undoRowStack);
+  if (UNDO_REDO_TYPE == 1) {
+    clearUndoStack(&undoStack);
+    clearUndoStack(&redoStack);
+  } else if (UNDO_REDO_TYPE == 2) {
+    clearRowUndoStack(&undoRowStack);
+    clearRowUndoStack(&redoRowStack);
+  } else {
+    return;
+  }
   freeEditorConfig(E);
 }
 
