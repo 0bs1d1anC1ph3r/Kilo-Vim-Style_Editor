@@ -29,8 +29,9 @@ extern UndoRowStack redoRowStack;
 extern UndoRowStack undoRowStack;
 
 void pushRowUndoStep(UndoRowStack *stack, RowState *changes, int change_count, int cx, int cy);
+void pushRowUndoStepSelection(void);
 UndoStep *popRowUndoStep(UndoRowStack *stack);
 void clearRowUndoStack(UndoRowStack *stack);
 
-void performRowUndo(UndoRowStack *undoStack, UndoRowStack *redoStack, editorConfig *E);
+void performRowUndo(UndoRowStack *undoStack, UndoRowStack *redoStack, editorConfig *E, _Bool undo);
 #endif

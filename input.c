@@ -11,18 +11,20 @@
 #include "config.h"
 
 // Undo config thing
-void undoTypeToPush()
+void undoTypeToPush(_Bool multiDel)
 {
   if (UNDO_REDO_TYPE == 1) {
     pushUndoState(&undoStack, E);
-    clearUndoStack(&redoStack);
   } else if (UNDO_REDO_TYPE == 2) {
-    RowState state;
-    state.row_index = E->cy;
-    state.oldContent = E->row[E->cy].chars;
-    state.newContent = NULL;
-    pushRowUndoStep(&undoRowStack, &state, 1, E->cx, E->cy);
-    clearRowUndoStack(&redoRowStack);
+    if (multiDel) {
+      pushRowUndoStepSelection();
+    } else {
+      RowState state;
+      state.row_index = E->cy;
+      state.oldContent = E->row[E->cy].chars;
+      state.newContent = NULL;
+      pushRowUndoStep(&undoRowStack, &state, 1, E->cx, E->cy);
+    }
   } else {
     return;
   }
@@ -38,9 +40,9 @@ void undoTypeRedoUndo(_Bool undo)
     }
   } else if (UNDO_REDO_TYPE == 2) {
     if (undo) {
-      performRowUndo(&undoRowStack, &redoRowStack, E);
+      performRowUndo(&undoRowStack, &redoRowStack, E, 1);
     } else {
-      // Implement redo
+      performRowUndo(&undoRowStack, &redoRowStack, E, 0);
       return;
     }
   } else {
@@ -199,7 +201,7 @@ void editorProcessKeypress(void)
           case BACKSPACE:
           case CTRL_KEY('h'):
           case DEL_KEY: {
-            undoTypeToPush();
+            undoTypeToPush(0);
 
             if (c == DEL_KEY) {
               editorMoveCursor(ARROW_RIGHT);
@@ -208,7 +210,7 @@ void editorProcessKeypress(void)
             break;
           }
           case '\r':
-            undoTypeToPush();
+            undoTypeToPush(0);
             editorInsertNewLine();
             break;
           default: {
@@ -302,9 +304,10 @@ void editorProcessKeypress(void)
         case 'd':
           if (E->selecting) {
             if (UNDO_REDO_TYPE == 1) {
-              undoTypeToPush();
+              undoTypeToPush(0);
+            } else {
+              undoTypeToPush(1);
             }
-
             editorDelSelected();
             E->selecting = 0;
           }
@@ -312,7 +315,9 @@ void editorProcessKeypress(void)
         case 'x':
           if (E->selecting) {
             if (UNDO_REDO_TYPE == 1) {
-              undoTypeToPush();
+              undoTypeToPush(0);
+            } else {
+              undoTypeToPush(1);
             }
             editorBufferSelection();
             if (E->selectBuf && E->selectBufLen > 0) {

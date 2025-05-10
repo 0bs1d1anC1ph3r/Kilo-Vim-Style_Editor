@@ -58,16 +58,6 @@ void pushUndoState(UndoStack *stack, const editorConfig *E)
   node->state = copyEditorState(E, node->arena);
   node->next = stack->top;
   stack->top = node;
-
-  UndoStackNode *current = stack->top;
-  UndoStackNode *prev = NULL;
-  while (current) {
-    if (prev) prev->next = NULL;
-    clearUndoStack(&(UndoStack){ .top = current });
-    break;
-  }
-  prev = current;
-  current = current->next;
 }
 
 static UndoStackNode *popUndoNode(UndoStack *stack)

@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -36,6 +38,39 @@ void pushRowUndoStep(UndoRowStack *stack, RowState *state, int changeCount, int 
   }
 }
 
+void pushRowUndoStepSelection(void)
+{
+  int startY = E->cy < E->sel_sy ? E->cy : E->sel_sy;
+  int endY   = E->cy > E->sel_sy ? E->cy : E->sel_sy;
+  int numRows = endY - startY + 1;
+
+  if (numRows < 1) {
+    return;
+  }
+
+  RowState *changes = xmalloc(sizeof(RowState) * numRows, 1);
+  for (int i = 0; i < numRows; i++) {
+    int idx = startY + i;
+    changes[i].row_index = idx;
+    if (idx >= 0 && idx < E->numRows) {
+      changes[i].oldContent = strdup(E->row[idx].chars);
+    } else {
+      changes[i].oldContent = NULL;
+    }
+    changes[i].newContent = NULL;
+  }
+
+  pushRowUndoStep(&undoRowStack, changes, numRows, E->cx, E->cy);
+  clearRowUndoStack(&redoRowStack);
+
+  for (int i = 0; i < numRows; i++) {
+    if (changes[i].oldContent) {
+      free(changes[i].oldContent);
+    }
+  }
+  free(changes);
+}
+
 UndoStep *popRowUndoStep(UndoRowStack *stack)
 {
   if (!stack->top) {
@@ -54,6 +89,7 @@ static void freeUndoStep(UndoStep *step)
   if (step->arena) {
     arena_free(step->arena);
   }
+  free(step);
 }
 
 void clearRowUndoStack(UndoRowStack *stack)
@@ -67,9 +103,14 @@ void clearRowUndoStack(UndoRowStack *stack)
   stack->top = NULL;
 }
 
-void performRowUndo(UndoRowStack *undoRowStack, UndoRowStack *redoRowStack, editorConfig *E)
+void performRowUndo(UndoRowStack *undoRowStack, UndoRowStack *redoRowStack, editorConfig *E, _Bool undo)
 {
-  UndoStep *step = popRowUndoStep(undoRowStack);
+  UndoStep *step;
+  if (undo) {
+    step = popRowUndoStep(undoRowStack);
+  } else {
+    step = popRowUndoStep(redoRowStack);
+  }
 
   if (!step) {
     return;
@@ -91,6 +132,12 @@ void performRowUndo(UndoRowStack *undoRowStack, UndoRowStack *redoRowStack, edit
   E->cx = step->cx;
   E->cy = step->cy;
 
-  step->next = redoRowStack->top;
-  redoRowStack->top = step;
+  UndoRowStack *targetStack = undo ? redoRowStack : undoRowStack;
+  if (targetStack) {
+    step->next = targetStack->top;
+    targetStack->top = step;
+  } else {
+    freeUndoStep(step);
+  }
 }
+
