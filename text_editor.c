@@ -46,6 +46,8 @@ static void initCommands()
   registerCommand("!e", editorEditFile);
   registerCommand("wq", editorSaveQuit);
   registerCommand("!wq", editorSaveQuit);
+  registerCommand("u", editorUndoCommand);
+  registerCommand("r", editorRedoCommand);
 }
 
 // Cleanup
@@ -106,7 +108,62 @@ void editorCopyToClipboard(const char *text, size_t len)
   pclose(pipe);
 }
 
+void editorPasteClipboard(void)
+{
+  FILE *fp = popen("wl-paste", "r");
+  if (!fp) {
+    return;
+  }
+
+  char *clipboard = NULL;
+  size_t len = 0;
+
+  size_t nread = getdelim(&clipboard, &len, '\0', fp);
+  pclose(fp);
+
+  if (nread <= 0) {
+    free(clipboard);
+    return;
+  }
+
+  if (nread > 0 && clipboard[nread - 1] == '\n') {
+    clipboard[nread - 1] = '\0';
+    nread--;
+  }
+
+  for (ssize_t i = 0; i < nread; i++) {
+    char c = clipboard[i];
+
+    if (c == '\n') {
+      editorInsertNewLine();
+    } else {
+      editorInsertChar(c);
+    }
+  }
+  free(clipboard);
+}
+
 //Editor opperations
+
+void undoTypeRedoUndo(_Bool undo)
+{
+  if (UNDO_REDO_TYPE == 1) {
+    if (undo) {
+      performUndo(&undoStack, &redoStack, E);
+    } else {
+      performRedo(&redoStack, &undoStack, E);
+    }
+  } else if (UNDO_REDO_TYPE == 2) {
+    if (undo) {
+      performRowUndo(&undoRowStack, &redoRowStack, E);
+    } else {
+      performRowRedo(&undoRowStack, &redoRowStack, E);
+    }
+  } else {
+    return;
+  }
+}
+
 void editorIndexRows(void)
 {
   for (int i = 0; i < E->numRows; i++) {

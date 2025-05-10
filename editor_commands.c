@@ -137,3 +137,21 @@ void editorEditFile(_Bool forceEdit, const char *args, struct editorConfig *E)
   editorOpen(filename);
   free(filename);
 }
+
+void editorUndoCommand(_Bool force, const char *args, struct editorConfig *E)
+{
+  if (args != NULL) {
+    editorSetStatusMessage("Invalid number of arguments");
+    return;
+  }
+  undoTypeRedoUndo(1);
+}
+
+void editorRedoCommand(_Bool force, const char *args, struct editorConfig *E)
+{
+  if (args != NULL) {
+    editorSetStatusMessage("Invalid number of arguments");
+    return;
+  }
+  undoTypeRedoUndo(0);
+}

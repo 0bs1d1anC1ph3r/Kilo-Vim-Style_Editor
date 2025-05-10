@@ -62,6 +62,7 @@ enum editorKey {
 void editorOpen(const char *filename);
 
 // Editor operations
+void undoTypeRedoUndo(_Bool undo);
 void editorIndexRows(void);
 void editorInsertChar(int c);
 void editorDelChar(void);
@@ -70,6 +71,7 @@ void editorDelSelected(void);
 
 // Clipboard
 void editorCopyToClipboard(const char *text, size_t len);
+void editorPasteClipboard(void);
 void editorBufferSelection(void);
 
 // Screen rendering

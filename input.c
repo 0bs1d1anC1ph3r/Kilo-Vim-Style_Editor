@@ -30,25 +30,6 @@ void undoTypeToPush(_Bool multiDel)
   }
 }
 
-void undoTypeRedoUndo(_Bool undo)
-{
-  if (UNDO_REDO_TYPE == 1) {
-    if (undo) {
-      performUndo(&undoStack, &redoStack, E);
-    } else {
-      performRedo(&redoStack, &undoStack, E);
-    }
-  } else if (UNDO_REDO_TYPE == 2) {
-    if (undo) {
-      performRowUndo(&undoRowStack, &redoRowStack, E);
-    } else {
-      performRowRedo(&undoRowStack, &redoRowStack, E);
-    }
-  } else {
-    return;
-  }
-}
-
 //Low-level terminal input
 int editorReadKey(void)
 {
@@ -200,8 +181,6 @@ void editorProcessKeypress(void)
           case BACKSPACE:
           case CTRL_KEY('h'):
           case DEL_KEY: {
-            undoTypeToPush(0);
-
             if (c == DEL_KEY) {
               editorMoveCursor(ARROW_RIGHT);
             }
@@ -209,11 +188,9 @@ void editorProcessKeypress(void)
             break;
           }
           case '\r':
-            undoTypeToPush(0);
             editorInsertNewLine();
             break;
           default: {
-            undoTypeToPush(0);
             editorInsertChar(c);
             break;
           }
@@ -248,6 +225,7 @@ void editorProcessKeypress(void)
             break;
           }
         case 'i':
+          undoTypeToPush(0);
           mode = MODE_INSERT;
           break;
         case ':':
@@ -329,11 +307,8 @@ void editorProcessKeypress(void)
             E->selecting = 0;
           }
           break;
-        case 'f':
-          undoTypeRedoUndo(1);
-          break;
-        case 'g':
-          undoTypeRedoUndo(0);
+        case 'p':
+          editorPasteClipboard();
           break;
         case ARROW_RIGHT:
         case ARROW_DOWN:
