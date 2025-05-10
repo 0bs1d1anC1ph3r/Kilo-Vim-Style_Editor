@@ -40,10 +40,9 @@ void undoTypeRedoUndo(_Bool undo)
     }
   } else if (UNDO_REDO_TYPE == 2) {
     if (undo) {
-      performRowUndo(&undoRowStack, &redoRowStack, E, 1);
+      performRowUndo(&undoRowStack, &redoRowStack, E);
     } else {
-      performRowUndo(&undoRowStack, &redoRowStack, E, 0);
-      return;
+      performRowRedo(&undoRowStack, &redoRowStack, E);
     }
   } else {
     return;
@@ -214,8 +213,7 @@ void editorProcessKeypress(void)
             editorInsertNewLine();
             break;
           default: {
-            pushUndoState(&undoStack, E);
-            clearUndoStack(&redoStack);
+            undoTypeToPush(0);
             editorInsertChar(c);
             break;
           }

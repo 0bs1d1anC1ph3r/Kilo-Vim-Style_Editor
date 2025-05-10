@@ -9,6 +9,10 @@ typedef struct
   int row_index;
   char *oldContent;
   char *newContent;
+  int oldSize;
+  int oldCapacity;
+  int newSize;
+  int newCapacity;
 } RowState;
 
 typedef struct UndoStep
@@ -33,5 +37,6 @@ void pushRowUndoStepSelection(void);
 UndoStep *popRowUndoStep(UndoRowStack *stack);
 void clearRowUndoStack(UndoRowStack *stack);
 
-void performRowUndo(UndoRowStack *undoStack, UndoRowStack *redoStack, editorConfig *E, _Bool undo);
+void performRowUndo(UndoRowStack *undoStack, UndoRowStack *redoStack, editorConfig *E);
+void performRowRedo(UndoRowStack *undoStack, UndoRowStack *redoStack, editorConfig *E);
 #endif
